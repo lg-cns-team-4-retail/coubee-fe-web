@@ -1,7 +1,10 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { useNavigate, Link } from "react-router-dom";
 import loginImg from "../../assets/coubeeLogin.svg";
+import { useDispatch } from "react-redux";
+import { loginUser } from "../../redux/slices/userSlice";
+import NotificationModal from "../../components/NotificationModal"; // 알림 모달 컴포넌트
 
 const LoginContainer = styled.div`
   display: flex;
@@ -126,11 +129,20 @@ const StyledLink = styled(Link)`
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const [formData, setFormData] = useState({
-    userId: "",
+    username: "",
     password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [modalState, setModalState] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    onSuccess: null,
+    modalType: undefined,
+  });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -141,13 +153,32 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      console.log(formData);
-      navigate("/view");
-    } catch (error) {
-      console.error("회원가입 실패:", error);
+      const result = await dispatch(loginUser(formData)).unwrap();
+
+      console.log("로그인 성공:", result);
+      navigate("/");
+    } catch (err) {
+      console.error("로그인 실패:", err);
+      setModalState({
+        isOpen: true,
+        title: "로그인 실패",
+        message: err.message || "알 수 없는 오류가 발생했습니다.",
+        onSuccess: () => setModalState({ ...modalState, isOpen: false }),
+        modalType: "fail", // 실패 시 'fail' 타입으로 설정
+      });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const closeModal = () => {
+    setModalState({
+      isOpen: false,
+      title: "",
+      message: "",
+      onSuccess: null,
+      modalType: undefined,
+    });
   };
 
   return (
@@ -157,11 +188,11 @@ export default function LoginPage() {
       </LoginImageContainer>
       <LoginForm onSubmit={handleSubmit}>
         <InputGroup>
-          <Label htmlFor="userId">아이디</Label>
+          <Label htmlFor="username">아이디</Label>
           <Input
-            id="userId"
-            name="userId"
-            value={formData.userId}
+            id="username"
+            name="username"
+            value={formData.username}
             onChange={handleChange}
             placeholder="아이디"
             required
@@ -188,6 +219,16 @@ export default function LoginPage() {
           <StyledTextButton>회원가입</StyledTextButton>
         </StyledLink>
       </LoginForm>
+
+      <NotificationModal
+        isOpen={modalState.isOpen}
+        onClose={closeModal}
+        title={modalState.title}
+        message={modalState.message}
+        onSuccess={modalState.onSuccess}
+        buttonText="확인"
+        modalType={modalState.modalType} // modalType prop 전달
+      />
     </LoginContainer>
   );
 }

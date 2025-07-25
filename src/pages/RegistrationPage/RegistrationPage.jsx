@@ -2,7 +2,12 @@ import React, { useState, useRef } from "react";
 import styled from "styled-components";
 import { useNavigate, Link } from "react-router-dom";
 import regiImg from "../../assets/coubeeRegi.svg";
+import { useDispatch } from "react-redux";
+import easterImg from "../../assets/coubeeWelcome.svg";
 import NotificationModal from "../../components/NotificationModal";
+import { registerUser } from "../../redux/slices/userSlice";
+
+const WEB_ROLE = import.meta.env.VITE_APP_ROLE;
 
 const LoginContainer = styled.div`
   display: flex;
@@ -142,14 +147,24 @@ const StyledLink = styled(Link)`
 
 export default function RegistrationPage() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState({
-    userId: "",
+    username: "",
     password: "",
-    nickname: "",
+    nickName: "",
+    role: WEB_ROLE,
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [modalState, setModalState] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    onSuccess: null,
+    modalType: undefined,
+    buttonText: "",
+  });
   const [isConfirmModal, setIsConfirmModal] = useState(false);
-
+  const [easterCount, setEasterCount] = useState(1);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -159,10 +174,27 @@ export default function RegistrationPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      console.log(formData);
-      setIsConfirmModal(true);
-    } catch (error) {
-      console.error("회원가입 실패:", error);
+      const result = await dispatch(registerUser(formData)).unwrap();
+
+      console.log("회원가입 성공:", result);
+      setModalState({
+        isOpen: true,
+        title: "회원가입 성공",
+        message: "쿠비에 가입해주셔서 감사합니다!",
+        onSuccess: () => setModalState({ ...modalState, isOpen: false }),
+        buttonText: "로그인 하러 가기",
+        modalType: "success",
+      });
+    } catch (err) {
+      console.error("회원가입 실패:", err);
+      setModalState({
+        isOpen: true,
+        title: "로그인 실패",
+        message: err.message || "알 수 없는 오류가 발생했습니다.",
+        onSuccess: () => setModalState({ ...modalState, isOpen: false }),
+        buttonText: "닫기",
+        modalType: "fail",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -172,21 +204,40 @@ export default function RegistrationPage() {
     navigate("/login");
   };
 
+  const onClickEaster = () => {
+    setEasterCount((prev) => prev + 1);
+  };
+
+  const closeModal = () => {
+    setModalState({
+      isOpen: false,
+      title: "",
+      message: "",
+      onSuccess: null,
+      modalType: undefined,
+      buttonText: "",
+    });
+  };
+
   return (
     <LoginContainer>
       <LoginImageContainer>
         <SubTitle>성공적인 판매까지, 단 3단계면 충분합니다</SubTitle>
 
         <Title>가장 쉬운 온라인 판매, 지금 바로 시작하세요</Title>
-        <LoginImage src={regiImg} alt="쿠비" />
+        <LoginImage
+          onClick={onClickEaster}
+          src={easterCount >= 6 ? easterImg : regiImg}
+          alt="쿠비"
+        />
       </LoginImageContainer>
       <LoginForm onSubmit={handleSubmit}>
         <InputGroup>
-          <Label htmlFor="userId">아이디</Label>
+          <Label htmlFor="username">아이디</Label>
           <Input
-            id="userId"
-            name="userId"
-            value={formData.userId}
+            id="username"
+            name="username"
+            value={formData.username}
             onChange={handleChange}
             placeholder="아이디"
             required
@@ -207,12 +258,12 @@ export default function RegistrationPage() {
         </InputGroup>
 
         <InputGroup>
-          <Label htmlFor="password">사용자 이름</Label>
+          <Label htmlFor="nickName">사용자 이름</Label>
           <Input
-            id="nickname"
-            name="nickname"
+            id="nickName"
+            name="nickName"
             placeholder="홍길동"
-            value={formData.nickname}
+            value={formData.nickName}
             onChange={handleChange}
             required
           />
@@ -227,12 +278,13 @@ export default function RegistrationPage() {
       </LoginForm>
 
       <NotificationModal
-        isOpen={isConfirmModal}
-        onClose={() => setIsConfirmModal(false)}
-        title="회원가입 성공!"
-        message="쿠비에 오신것을 환영합니다"
-        onSuccess={handleSuccessAction}
-        buttonText="로그인 하러 가기"
+        isOpen={modalState.isOpen}
+        onClose={closeModal}
+        title={modalState.title}
+        message={modalState.message}
+        onSuccess={modalState.onSuccess}
+        buttonText={modalState.buttonText}
+        modalType={modalState.modalType} // modalType prop 전달
       />
     </LoginContainer>
   );

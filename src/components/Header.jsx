@@ -151,7 +151,7 @@ function Header() {
   const LoggedOutMenu = () => (
     <NavContainer>
       <NavButton to="/login">로그인</NavButton>
-      <SecondButton to="/register">회원가입</SecondButton>
+      <SecondButton to="/registration">회원가입</SecondButton>
       {/*       <NonNavButton onClick={handleToggleTheme}>
         {themeMode === "light" ? <FaMoon /> : <FaSun />}
       </NonNavButton> */}
@@ -215,7 +215,7 @@ function Header() {
             <NavButton to="/login" onClick={toggleMobileMenu}>
               로그인
             </NavButton>
-            <NavButton to="/register" onClick={toggleMobileMenu}>
+            <NavButton to="/registration" onClick={toggleMobileMenu}>
               회원가입
             </NavButton>
             {/*             <NonNavButton onClick={handleToggleTheme}>

@@ -4,9 +4,9 @@ import { ThemeProvider } from "styled-components";
 import { GlobalStyle, lightTheme, darkTheme } from "./styles/theme";
 import Header from "./components/Header.jsx";
 
-// 페이지 컴포넌트 임포트
 import LoginPage from "./pages/LoginPage/LoginPage";
 import RegistrationPage from "./pages/RegistrationPage/RegistrationPage";
+import MyStorePage from "./pages/MyStorePage/MyStorePage";
 
 function App() {
   const [theme, setTheme] = useState("dark");
@@ -25,6 +25,7 @@ function App() {
           {/* <Route path="/" element={<HomePage />} /> */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/registration" element={<RegistrationPage />} />
+          <Route path="/my-store" element={<MyStorePage />} />
         </Routes>
       </main>
     </ThemeProvider>

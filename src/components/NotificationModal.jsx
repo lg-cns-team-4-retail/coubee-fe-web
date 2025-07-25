@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import styled, { keyframes } from "styled-components";
+import { MdOutlineCancel } from "react-icons/md";
+import { FaCheck } from "react-icons/fa";
 
 // --- 스타일 컴포넌트 정의 (애니메이션 제거) ---
 const ModalBackdrop = styled.div`
@@ -27,21 +29,6 @@ const ModalContainer = styled.div`
   align-items: center;
   text-align: center;
 `;
-
-const SuccessIcon = () => (
-  <svg
-    width="60"
-    height="60"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
-      fill="#4CAF50"
-    />
-  </svg>
-);
 
 const ModalTitle = styled.h2`
   font-size: 1.5rem;
@@ -75,16 +62,38 @@ const ConfirmButton = styled.button`
   }
 `;
 
-// --- 범용 모달 컴포넌트 (애니메이션 로직 제거) ---
+const IconWrapper = styled.div`
+  margin-bottom: 16px;
+`;
+
+// --- 아이콘을 조건부로 렌더링하는 컴포넌트 ---
+const ModalIcon = ({ type }) => {
+  if (type === "success") {
+    return (
+      <IconWrapper>
+        <FaCheck size={48} color="#4CAF50" />
+      </IconWrapper>
+    );
+  }
+  if (type === "fail") {
+    return (
+      <IconWrapper>
+        <MdOutlineCancel size={56} color="#EF4444" />
+      </IconWrapper>
+    );
+  }
+  return null;
+};
+
 const NotificationModal = ({
   isOpen,
+  modalType,
   onClose,
   title,
   message,
   onSuccess,
   buttonText = "확인",
 }) => {
-  // isOpen이 false이면 아무것도 렌더링하지 않습니다.
   if (!isOpen) {
     return null;
   }
@@ -93,20 +102,16 @@ const NotificationModal = ({
     if (onSuccess) {
       onSuccess();
     }
-    // onSuccess 실행 후 모달을 닫습니다.
     onClose();
   };
 
   return (
-    // 배경 클릭 시 onClose 함수를 직접 호출합니다.
     <ModalBackdrop onClick={onClose}>
-      {/* 컨텐츠 영역 클릭 시 이벤트 전파를 막아 모달이 닫히지 않게 합니다. */}
       <ModalContainer onClick={(e) => e.stopPropagation()}>
-        <SuccessIcon />
+        <ModalIcon type={modalType} />
         <ModalTitle>{title}</ModalTitle>
         <ModalMessage hasButton={!!onSuccess}>{message}</ModalMessage>
 
-        {/* onSuccess prop이 존재할 때만 버튼을 렌더링합니다. */}
         {onSuccess && (
           <ConfirmButton onClick={handleConfirm}>{buttonText}</ConfirmButton>
         )}
