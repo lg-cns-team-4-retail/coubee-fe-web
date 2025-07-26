@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { FaInfoCircle } from "react-icons/fa";
+import StoreCreationModal from "./StoreCreationModal/StoreCreationModal";
 
 const mockStores = [
   {
@@ -165,11 +166,17 @@ const ActionButton = styled.button`
 `;
 
 export default function StoreListPage() {
+  const [creationModal, setCreationModal] = useState(false);
+
+  const closeCreationModal = () => {
+    setCreationModal(false);
+  };
   return (
     <PageContainer>
       <TitleContainer>
         <PageTitle>현재 등록된 매장 정보</PageTitle>
         <FaInfoCircle color="#A89E9A" />
+        <button onClick={() => setCreationModal(true)}>Create</button>
       </TitleContainer>
       <CardGrid>
         {mockStores.map((store) => (
@@ -193,6 +200,8 @@ export default function StoreListPage() {
           </StoreCard>
         ))}
       </CardGrid>
+
+      <StoreCreationModal isOpen={creationModal} onClose={closeCreationModal} />
     </PageContainer>
   );
 }
