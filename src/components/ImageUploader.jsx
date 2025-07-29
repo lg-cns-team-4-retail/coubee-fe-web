@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef } from "react";
 import styled from "styled-components";
 import Cropper from "react-easy-crop";
 import { getCroppedImg } from "./cropImage";
-
+import { uploadBackgroundImage, uploadProfileImage } from "../api/imgApi";
 // --- Styled Components Definition ---
 
 const Container = styled.div`
@@ -41,7 +41,20 @@ const CropperContainer = styled.div`
   height: 400px;
   background: #333;
   border-radius: 8px;
-  overflow: hidden; /* To keep the cropper within the rounded corners */
+  overflow: hidden;
+`;
+
+const PreviewContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+`;
+
+const PreviewImage = styled.img`
+  max-width: 100%;
+  max-height: 400px;
+  border-radius: 8px;
 `;
 
 const Controls = styled.div`
@@ -99,11 +112,10 @@ const LoadingSpinner = styled.div`
   font-size: 1.2rem;
   color: #555;
 `;
+
 const ImageHelperText = styled.p`
   padding: 1rem;
 `;
-
-// --- Helper Function ---
 
 function readFile(file) {
   return new Promise((resolve) => {
@@ -113,13 +125,12 @@ function readFile(file) {
   });
 }
 
-// --- Component ---
-
-const ImageUploader = ({ aspectRatio, onUploadComplete }) => {
+const ImageUploader = ({ aspectRatio, onUploadComplete, type }) => {
   const [imageSrc, setImageSrc] = useState(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [croppedImage, setCroppedImage] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -133,6 +144,7 @@ const ImageUploader = ({ aspectRatio, onUploadComplete }) => {
     }
     let imageDataUrl = await readFile(file);
     setImageSrc(imageDataUrl);
+    setCroppedImage(null);
   };
 
   const onFileChange = (e) => {
@@ -144,11 +156,9 @@ const ImageUploader = ({ aspectRatio, onUploadComplete }) => {
   const handleDirectUpload = async (file) => {
     setIsUploading(true);
     try {
-      console.log(file);
-      /* const s3Url = await uploadToS3(file); */
       onUploadComplete(file);
     } catch (error) {
-      console.error("S3 업로드 실패:", error);
+      console.error("Upload failed:", error);
     } finally {
       setIsUploading(false);
     }
@@ -158,7 +168,17 @@ const ImageUploader = ({ aspectRatio, onUploadComplete }) => {
     setCroppedAreaPixels(croppedAreaPixels);
   }, []);
 
-  const handleCropAndUpload = useCallback(async () => {
+  const handleShowCroppedImage = useCallback(async () => {
+    try {
+      const croppedImageBlob = await getCroppedImg(imageSrc, croppedAreaPixels);
+      console.log(croppedImageBlob, "check");
+      setCroppedImage(croppedImageBlob);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [imageSrc, croppedAreaPixels]);
+
+  const handleConfirmUpload = useCallback(async () => {
     setIsUploading(true);
     try {
       const croppedImageBlob = await getCroppedImg(
@@ -166,10 +186,24 @@ const ImageUploader = ({ aspectRatio, onUploadComplete }) => {
         croppedAreaPixels,
         true
       );
-      console.log(croppedImageBlob);
-      /* const s3Url = await uploadToS3(croppedImageBlob); */
-      onUploadComplete(croppedImageBlob);
-      reset();
+
+      const croppedImageFile = new File(
+        [croppedImageBlob],
+        `cropped-image-${Date.now()}.png`,
+        {
+          type: "image/*",
+        }
+      );
+
+      if (type === "background") {
+        const finalImgUrl = await uploadBackgroundImage(croppedImageFile);
+        onUploadComplete(finalImgUrl);
+        reset();
+      } else {
+        const finalImgUrl = await uploadProfileImage(croppedImageFile);
+        onUploadComplete(finalImgUrl);
+        reset();
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -179,6 +213,7 @@ const ImageUploader = ({ aspectRatio, onUploadComplete }) => {
 
   const reset = () => {
     setImageSrc(null);
+    setCroppedImage(null);
     setZoom(1);
     setCrop({ x: 0, y: 0 });
     if (inputRef.current) {
@@ -214,59 +249,73 @@ const ImageUploader = ({ aspectRatio, onUploadComplete }) => {
     }
   };
 
-  return (
-    <Container>
-      {isUploading ? (
-        <LoadingSpinner>업로드 중...</LoadingSpinner>
-      ) : (
-        <>
-          {!imageSrc && (
-            <DropZone
-              onClick={() => inputRef.current.click()}
-              onDragEnter={handleDragEnter}
-              onDragLeave={handleDragLeave}
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-              isDragging={isDragging}
-            >
-              <input
-                type="file"
-                accept="image/*"
-                ref={inputRef}
-                onChange={onFileChange}
-                style={{ display: "none" }}
-              />
-              <ImageHelperText>
-                이미지를 올리시거나 클릭해서 업로드 해주세요
-              </ImageHelperText>
-            </DropZone>
-          )}
+  const renderContent = () => {
+    if (isUploading) {
+      return <LoadingSpinner>업로드 중...</LoadingSpinner>;
+    }
 
-          {imageSrc && aspectRatio && (
-            <>
-              <CropperContainer>
-                <Cropper
-                  image={imageSrc}
-                  crop={crop}
-                  zoom={zoom}
-                  aspect={aspectRatio}
-                  onCropChange={setCrop}
-                  onZoomChange={setZoom}
-                  onCropComplete={onCropComplete}
-                />
-              </CropperContainer>
-              <Controls>
-                <PrimaryButton onClick={handleCropAndUpload}>
-                  적용하기
-                </PrimaryButton>
-                <SecondaryButton onClick={reset}>취소</SecondaryButton>
-              </Controls>
-            </>
-          )}
+    if (croppedImage) {
+      return (
+        <PreviewContainer>
+          <PreviewImage src={croppedImage} alt="Cropped Preview" />
+          <Controls>
+            <PrimaryButton onClick={handleConfirmUpload}>확인</PrimaryButton>
+            <SecondaryButton onClick={() => setCroppedImage(null)}>
+              다시 선택
+            </SecondaryButton>
+          </Controls>
+        </PreviewContainer>
+      );
+    }
+
+    if (imageSrc && aspectRatio) {
+      return (
+        <>
+          <CropperContainer>
+            <Cropper
+              image={imageSrc}
+              crop={crop}
+              zoom={zoom}
+              aspect={aspectRatio}
+              onCropChange={setCrop}
+              onZoomChange={setZoom}
+              onCropComplete={onCropComplete}
+            />
+          </CropperContainer>
+          <Controls>
+            <PrimaryButton onClick={handleShowCroppedImage}>
+              적용하기
+            </PrimaryButton>
+            <SecondaryButton onClick={reset}>취소</SecondaryButton>
+          </Controls>
         </>
-      )}
-    </Container>
-  );
+      );
+    }
+
+    return (
+      <DropZone
+        onClick={() => inputRef.current.click()}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+        isDragging={isDragging}
+      >
+        <input
+          type="file"
+          accept="image/*"
+          ref={inputRef}
+          onChange={onFileChange}
+          style={{ display: "none" }}
+        />
+        <ImageHelperText>
+          이미지를 올리시거나 클릭해서 업로드 해주세요
+        </ImageHelperText>
+      </DropZone>
+    );
+  };
+
+  return <Container>{renderContent()}</Container>;
 };
 
 export default ImageUploader;

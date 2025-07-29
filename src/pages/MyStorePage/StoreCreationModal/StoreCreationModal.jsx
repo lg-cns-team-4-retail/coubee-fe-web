@@ -72,7 +72,11 @@ const Step1 = ({ data, onChange, onImageUpload, imagePreviewUrl, errors }) => {
       <div>
         <section>
           <FormLabel>배경 이미지</FormLabel>
-          <ImageUploader aspectRatio={1 / 1} onUploadComplete={onImageUpload} />
+          <ImageUploader
+            type={"background"}
+            aspectRatio={1 / 1}
+            onUploadComplete={onImageUpload}
+          />
           {imagePreviewUrl && (
             <img
               src={imagePreviewUrl}
@@ -430,7 +434,6 @@ const StoreCreationModal = ({ isOpen, onClose }) => {
   const handleImageUpload = (file) => {
     setFormData((prev) => ({ ...prev, backgroundImage: file }));
     console.log(file);
-    setBackgroundImagePreview(URL.createObjectURL(file));
   };
 
   const steps = [
@@ -473,6 +476,8 @@ const StoreCreationModal = ({ isOpen, onClose }) => {
 
     return () => URL.revokeObjectURL(objectUrl);
   }, [formData.backgroundImage]); */
+
+  console.log(formData, "check");
   return (
     <ModalBackdrop onClick={onClose}>
       <ModalContainer onClick={(e) => e.stopPropagation()}>

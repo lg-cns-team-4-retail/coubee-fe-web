@@ -174,7 +174,7 @@ function Header() {
   return (
     <>
       <HeaderContainer>
-        <LogoLink to="/view">
+        <LogoLink to="/my-store">
           <img
             src={coubee}
             alt="쿠비 로고"
