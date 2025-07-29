@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled, { css } from "styled-components";
 import { FaRegPaperPlane } from "react-icons/fa";
 import coubeeIcon from "../../../assets/coubee.svg";
@@ -36,38 +36,132 @@ const FormTextArea = styled.textarea`
   resize: vertical;
 `;
 
-const Step2 = () => (
+const ErrorMessage = styled.p`
+  color: #d9534f;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+`;
+
+// --- 각 단계별 컴포넌트 ---
+// 컴포넌트를 StoreCreationModal 외부로 분리하여 불필요한 리렌더링을 방지합니다.
+
+const Step1 = ({ data, onChange, onImageUpload, imagePreviewUrl, errors }) => {
+  return (
+    <StepContentWrapper>
+      <div>
+        <FormLabel htmlFor="storeName">가게 이름</FormLabel>
+        <FormInput
+          id="storeName"
+          placeholder="예: 장씨네 과일가게"
+          value={data.storeName}
+          onChange={onChange}
+        />
+        {errors.storeName && <ErrorMessage>{errors.storeName}</ErrorMessage>}
+      </div>
+      <div>
+        <FormLabel htmlFor="storeDesc">가게 정보</FormLabel>
+        <FormTextArea
+          id="storeDesc"
+          placeholder="가게를 소개해주세요."
+          value={data.storeDesc}
+          onChange={onChange}
+        />
+        {errors.storeDesc && <ErrorMessage>{errors.storeDesc}</ErrorMessage>}
+      </div>
+
+      <div>
+        <section>
+          <FormLabel>배경 이미지</FormLabel>
+          <ImageUploader aspectRatio={1 / 1} onUploadComplete={onImageUpload} />
+          {imagePreviewUrl && (
+            <img
+              src={imagePreviewUrl}
+              alt="배경 미리보기"
+              width="320"
+              style={{ marginTop: "1rem", borderRadius: "8px" }}
+            />
+          )}
+        </section>
+      </div>
+    </StepContentWrapper>
+  );
+};
+
+const Step2 = ({ data, onChange, errors }) => (
   <StepContentWrapper>
     <div>
       <FormLabel htmlFor="bizNumber">사업자 번호</FormLabel>
-      <FormInput id="bizNumber" placeholder="- 없이 입력" />
+      <FormInput
+        id="bizNumber"
+        placeholder="- 없이 입력"
+        value={data.bizNumber}
+        onChange={onChange}
+      />
+      {errors.bizNumber && <ErrorMessage>{errors.bizNumber}</ErrorMessage>}
     </div>
     <div>
       <FormLabel htmlFor="ownerName">사업자 성함</FormLabel>
-      <FormInput id="ownerName" placeholder="예: 홍길동" />
+      <FormInput
+        id="ownerName"
+        placeholder="예: 홍길동"
+        value={data.ownerName}
+        onChange={onChange}
+      />
+      {errors.ownerName && <ErrorMessage>{errors.ownerName}</ErrorMessage>}
     </div>
   </StepContentWrapper>
 );
 
-const Step3 = () => (
+const Step3 = ({ data, onChange, errors }) => (
   <StepContentWrapper>
     <div>
       <FormLabel htmlFor="address">가게 위치</FormLabel>
-      <FormInput id="address" placeholder="도로명 주소를 입력해주세요." />
+      <FormInput
+        id="address"
+        placeholder="도로명 주소를 입력해주세요."
+        value={data.address}
+        onChange={onChange}
+      />
+      {errors.address && <ErrorMessage>{errors.address}</ErrorMessage>}
     </div>
     <div>
       <FormLabel htmlFor="hours">영업 시간</FormLabel>
-      <FormInput id="hours" placeholder="예: 평일 09:00 ~ 18:00" />
+      <FormInput
+        id="hours"
+        placeholder="예: 평일 09:00 ~ 18:00"
+        value={data.hours}
+        onChange={onChange}
+      />
+      {errors.hours && <ErrorMessage>{errors.hours}</ErrorMessage>}
     </div>
   </StepContentWrapper>
 );
 
-const Step4 = () => (
+const Step4 = ({ data }) => (
   <StepContentWrapper>
     <div style={{ textAlign: "center", paddingTop: "2rem" }}>
       <FaRegPaperPlane size={48} color="#8E6559" />
       <h3 style={{ marginTop: "1rem" }}>마지막 단계입니다.</h3>
       <p>입력하신 정보를 확인하시고 제출 버튼을 눌러주세요.</p>
+      <div
+        style={{
+          textAlign: "left",
+          marginTop: "2rem",
+          padding: "1rem",
+          backgroundColor: "#f9f9f9",
+          borderRadius: "8px",
+        }}
+      >
+        <p>
+          <strong>가게 이름:</strong> {data.storeName}
+        </p>
+        <p>
+          <strong>사업자 번호:</strong> {data.bizNumber}
+        </p>
+        <p>
+          <strong>가게 위치:</strong> {data.address}
+        </p>
+      </div>
     </div>
   </StepContentWrapper>
 );
@@ -220,9 +314,16 @@ const SecondaryButton = styled(ActionButton)`
 `;
 const ModalContent = styled.div`
   max-height: 70vh;
-  overflow-y: scroll;
+  overflow-y: auto;
+  padding-right: 0.5rem; /* 스크롤바가 콘텐츠를 가리는 것을 방지 */
+
+  @media (max-width: 1024px) {
+    max-height: 60vh;
+  }
+
   @media (max-width: 768px) {
     max-height: 50vh;
+    padding-right: 0;
   }
 `;
 
@@ -254,12 +355,67 @@ const ProgressBar = ({ currentStep, totalSteps, stepTitles }) => {
 // --- 메인 모달 컴포넌트 ---
 const StoreCreationModal = ({ isOpen, onClose }) => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [backgroundImageUrl, setBackgroundImageUrl] = useState("");
+  const [formData, setFormData] = useState({
+    storeName: "",
+    storeDesc: "",
+    backgroundImage: null,
+    bizNumber: "",
+    ownerName: "",
+    address: "",
+    hours: "",
+  });
+  const [backgroundImagePreview, setBackgroundImagePreview] = useState("");
+  const [errors, setErrors] = useState({});
 
   if (!isOpen) return null;
 
+  // 이미지 파일이 변경될 때마다 미리보기 URL 생성 및 정리
+
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+    if (errors[id]) {
+      setErrors((prevErrors) => {
+        const newErrors = { ...prevErrors };
+        delete newErrors[id];
+        return newErrors;
+      });
+    }
+  };
+
+  const validateStep = (step, data) => {
+    const newErrors = {};
+    switch (step) {
+      case 1:
+        if (!data.storeName.trim())
+          newErrors.storeName = "가게 이름을 입력해주세요.";
+        if (!data.storeDesc.trim())
+          newErrors.storeDesc = "가게 정보를 입력해주세요.";
+        break;
+      case 2:
+        if (!data.bizNumber.trim()) {
+          newErrors.bizNumber = "사업자 번호를 입력해주세요.";
+        } /*  else if (!/^\d{10}$/.test(data.bizNumber)) {
+          newErrors.bizNumber = "유효한 사업자 번호 10자리를 입력해주세요.";
+        } */
+        if (!data.ownerName.trim())
+          newErrors.ownerName = "사업자 성함을 입력해주세요.";
+        break;
+      case 3:
+        if (!data.address.trim())
+          newErrors.address = "가게 위치를 입력해주세요.";
+        if (!data.hours.trim()) newErrors.hours = "영업 시간을 입력해주세요.";
+        break;
+      default:
+        break;
+    }
+    return { isValid: Object.keys(newErrors).length === 0, errors: newErrors };
+  };
+
   const handleNext = () => {
-    setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
+    const { isValid, errors: newErrors } = validateStep(currentStep, formData);
+    setErrors(newErrors);
+    if (isValid) setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
   };
 
   const handlePrev = () => {
@@ -267,45 +423,56 @@ const StoreCreationModal = ({ isOpen, onClose }) => {
   };
 
   const handleSubmit = () => {
-    onClose(); // 제출 후 모달 닫기
+    console.log("제출할 데이터:", formData);
+    onClose();
   };
 
-  const Step1 = () => {
-    return (
-      <StepContentWrapper>
-        <div>
-          <FormLabel htmlFor="storeName">가게 이름</FormLabel>
-          <FormInput id="storeName" placeholder="예: 장씨네 과일가게" />
-        </div>
-        <div>
-          <FormLabel htmlFor="storeDesc">가게 정보</FormLabel>
-          <FormTextArea id="storeDesc" placeholder="가게를 소개해주세요." />
-        </div>
-
-        <div>
-          <section>
-            <FormLabel>배경 이미지</FormLabel>
-            <ImageUploader
-              aspectRatio={1 / 1}
-              onUploadComplete={setBackgroundImageUrl}
-            />
-            {backgroundImageUrl && (
-              <img src={backgroundImageUrl} alt="배경 미리보기" width="320" />
-            )}
-          </section>
-        </div>
-      </StepContentWrapper>
-    );
+  const handleImageUpload = (file) => {
+    setFormData((prev) => ({ ...prev, backgroundImage: file }));
+    console.log(file);
+    setBackgroundImagePreview(URL.createObjectURL(file));
   };
+
   const steps = [
-    { title: "가게 정보", component: <Step1 /> },
-    { title: "사업자 정보", component: <Step2 /> },
-    { title: "영업 정보", component: <Step3 /> },
-    { title: "최종 확인", component: <Step4 /> },
+    {
+      title: "가게 정보",
+      component: (
+        <Step1
+          data={formData}
+          onChange={handleChange}
+          onImageUpload={handleImageUpload}
+          imagePreviewUrl={backgroundImagePreview}
+          errors={errors}
+        />
+      ),
+    },
+    {
+      title: "사업자 정보",
+      component: (
+        <Step2 data={formData} onChange={handleChange} errors={errors} />
+      ),
+    },
+    {
+      title: "영업 정보",
+      component: (
+        <Step3 data={formData} onChange={handleChange} errors={errors} />
+      ),
+    },
+    { title: "최종 확인", component: <Step4 data={formData} /> },
   ];
 
   const totalSteps = steps.length;
+  /*   useEffect(() => {
+    if (!formData.backgroundImage) {
+      setBackgroundImagePreview("");
+      return;
+    }
 
+    const objectUrl = URL.createObjectURL(formData.backgroundImage);
+    setBackgroundImagePreview(objectUrl);
+
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [formData.backgroundImage]); */
   return (
     <ModalBackdrop onClick={onClose}>
       <ModalContainer onClick={(e) => e.stopPropagation()}>

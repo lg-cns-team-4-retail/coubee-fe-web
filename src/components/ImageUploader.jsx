@@ -144,8 +144,9 @@ const ImageUploader = ({ aspectRatio, onUploadComplete }) => {
   const handleDirectUpload = async (file) => {
     setIsUploading(true);
     try {
+      console.log(file);
       /* const s3Url = await uploadToS3(file); */
-      onUploadComplete(s3Url);
+      onUploadComplete(file);
     } catch (error) {
       console.error("S3 업로드 실패:", error);
     } finally {
@@ -165,8 +166,9 @@ const ImageUploader = ({ aspectRatio, onUploadComplete }) => {
         croppedAreaPixels,
         true
       );
+      console.log(croppedImageBlob);
       /* const s3Url = await uploadToS3(croppedImageBlob); */
-      onUploadComplete(s3Url);
+      onUploadComplete(croppedImageBlob);
       reset();
     } catch (e) {
       console.error(e);
