@@ -278,7 +278,7 @@ const StoreCreationModal = ({ isOpen, onClose }) => {
           <FormInput id="storeName" placeholder="예: 장씨네 과일가게" />
         </div>
         <div>
-          <FormLabel htmlFor="storeDesc">가게 디테일</FormLabel>
+          <FormLabel htmlFor="storeDesc">가게 정보</FormLabel>
           <FormTextArea id="storeDesc" placeholder="가게를 소개해주세요." />
         </div>
 
