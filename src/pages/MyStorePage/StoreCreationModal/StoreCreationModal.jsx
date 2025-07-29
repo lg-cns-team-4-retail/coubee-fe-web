@@ -84,7 +84,6 @@ const Step4 = () => (
   </StepContentWrapper>
 );
 
-
 const ModalBackdrop = styled.div`
   position: fixed;
   top: 0;
@@ -102,15 +101,19 @@ const ModalContainer = styled.div`
   background-color: white;
   border-radius: 16px;
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-  width: 90%;
-  max-width: 600px;
+  width: 100%;
+  max-width: 1100px;
   padding: 2rem;
+
+  @media (max-width: 768px) {
+    max-width: 95vw;
+  }
 `;
 
 const ModalTitle = styled.h2`
   text-align: center;
   font-size: 1.5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 4rem;
   color: #333;
 `;
 
@@ -144,20 +147,28 @@ const ProgressFill = styled.div`
   transition: width 0.4s ease;
 `;
 
-const StepNodeContainer = styled.div`
+const StepNodeWrapper = styled.div`
   position: relative;
   width: 100%;
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  height: 100%;
+`;
+
+const StepNodeContainer = styled.div`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;
 
 const StepNode = styled.div`
-  position: relative;
   width: 20px;
   height: 20px;
-  border-radius: 50%;
   background-color: ${({ active }) => (active ? "#8E6559" : "#e0e0e0")};
   border: 3px solid white;
+  border-radius: 50%;
   z-index: 1;
   transition: background-color 0.4s ease;
 `;
@@ -174,13 +185,14 @@ const StepLabel = styled.span`
 
 const ProgressIcon = styled.img`
   position: absolute;
-  top: 50%;
-  left: ${({ progress }) => progress}%;
-  transform: translate(-50%, -50%);
-  width: 40px;
-  height: 40px;
-  transition: left 0.4s ease;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 50px;
   z-index: 2;
+  display: ${({ show }) => (show ? "block" : "none")};
+  transition: left 0.4s ease;
 `;
 
 const ModalActions = styled.div`
@@ -227,14 +239,19 @@ const ProgressBar = ({ currentStep, totalSteps, stepTitles }) => {
     <ProgressBarContainer>
       <ProgressTrack />
       <ProgressFill progress={progress} />
-      <ProgressIcon src={coubeeIcon} alt="current step" progress={progress} />
-      <StepNodeContainer>
+      <StepNodeWrapper>
         {stepTitles.map((title, index) => (
-          <StepNode key={index} active={index + 1 <= currentStep}>
+          <StepNodeContainer key={index}>
+            <ProgressIcon
+              src={coubeeIcon}
+              alt="current step"
+              show={index + 1 === currentStep}
+            />
+            <StepNode active={index + 1 <= currentStep} />
             <StepLabel active={index + 1 <= currentStep}>{title}</StepLabel>
-          </StepNode>
+          </StepNodeContainer>
         ))}
-      </StepNodeContainer>
+      </StepNodeWrapper>
     </ProgressBarContainer>
   );
 };
