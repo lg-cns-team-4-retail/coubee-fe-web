@@ -69,7 +69,6 @@ const PageTitle = styled.h1`
   text-align: center;
 `;
 
-// 반응형 그리드 컨테이너
 const CardGrid = styled.div`
   display: grid;
   gap: 1.5rem;
@@ -125,7 +124,7 @@ const StoreLogo = styled.img`
 `;
 
 const CardContent = styled.div`
-  padding: 2.5rem 1.5rem 1.5rem; // 로고와 겹치지 않도록 상단 패딩 추가
+  padding: 2.5rem 1.5rem 1.5rem;
 `;
 
 const StoreName = styled.h2`

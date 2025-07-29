@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import styled, { css } from "styled-components";
 import { FaRegPaperPlane } from "react-icons/fa";
 import coubeeIcon from "../../../assets/coubee.svg";
+import ImageUploader from "../../../components/ImageUploader";
 
 const StepContentWrapper = styled.div`
   padding: 1rem 0;
@@ -34,19 +35,6 @@ const FormTextArea = styled.textarea`
   min-height: 80px;
   resize: vertical;
 `;
-
-const Step1 = () => (
-  <StepContentWrapper>
-    <div>
-      <FormLabel htmlFor="storeName">가게 이름</FormLabel>
-      <FormInput id="storeName" placeholder="예: 장씨네 과일가게" />
-    </div>
-    <div>
-      <FormLabel htmlFor="storeDesc">가게 정보</FormLabel>
-      <FormTextArea id="storeDesc" placeholder="가게를 소개해주세요." />
-    </div>
-  </StepContentWrapper>
-);
 
 const Step2 = () => (
   <StepContentWrapper>
@@ -230,6 +218,13 @@ const SecondaryButton = styled(ActionButton)`
     opacity: 1;
   }
 `;
+const ModalContent = styled.div`
+  max-height: 70vh;
+  overflow-y: scroll;
+  @media (max-width: 768px) {
+    max-height: 50vh;
+  }
+`;
 
 const ProgressBar = ({ currentStep, totalSteps, stepTitles }) => {
   const progress =
@@ -259,13 +254,7 @@ const ProgressBar = ({ currentStep, totalSteps, stepTitles }) => {
 // --- 메인 모달 컴포넌트 ---
 const StoreCreationModal = ({ isOpen, onClose }) => {
   const [currentStep, setCurrentStep] = useState(1);
-  const steps = [
-    { title: "가게 정보", component: <Step1 /> },
-    { title: "사업자 정보", component: <Step2 /> },
-    { title: "영업 정보", component: <Step3 /> },
-    { title: "최종 확인", component: <Step4 /> },
-  ];
-  const totalSteps = steps.length;
+  const [backgroundImageUrl, setBackgroundImageUrl] = useState("");
 
   if (!isOpen) return null;
 
@@ -281,6 +270,42 @@ const StoreCreationModal = ({ isOpen, onClose }) => {
     onClose(); // 제출 후 모달 닫기
   };
 
+  const Step1 = () => {
+    return (
+      <StepContentWrapper>
+        <div>
+          <FormLabel htmlFor="storeName">가게 이름</FormLabel>
+          <FormInput id="storeName" placeholder="예: 장씨네 과일가게" />
+        </div>
+        <div>
+          <FormLabel htmlFor="storeDesc">가게 정보</FormLabel>
+          <FormTextArea id="storeDesc" placeholder="가게를 소개해주세요." />
+        </div>
+
+        <div>
+          <section>
+            <FormLabel>배경 이미지</FormLabel>
+            <ImageUploader
+              aspectRatio={1 / 1}
+              onUploadComplete={setBackgroundImageUrl}
+            />
+            {backgroundImageUrl && (
+              <img src={backgroundImageUrl} alt="배경 미리보기" width="320" />
+            )}
+          </section>
+        </div>
+      </StepContentWrapper>
+    );
+  };
+  const steps = [
+    { title: "가게 정보", component: <Step1 /> },
+    { title: "사업자 정보", component: <Step2 /> },
+    { title: "영업 정보", component: <Step3 /> },
+    { title: "최종 확인", component: <Step4 /> },
+  ];
+
+  const totalSteps = steps.length;
+
   return (
     <ModalBackdrop onClick={onClose}>
       <ModalContainer onClick={(e) => e.stopPropagation()}>
@@ -290,8 +315,7 @@ const StoreCreationModal = ({ isOpen, onClose }) => {
           totalSteps={totalSteps}
           stepTitles={steps.map((s) => s.title)}
         />
-
-        {steps[currentStep - 1].component}
+        <ModalContent>{steps[currentStep - 1].component}</ModalContent>
 
         <ModalActions>
           <SecondaryButton onClick={handlePrev} disabled={currentStep === 1}>
