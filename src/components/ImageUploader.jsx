@@ -168,7 +168,7 @@ const ImageUploader = ({ aspectRatio, onUploadComplete, type }) => {
     setCroppedAreaPixels(croppedAreaPixels);
   }, []);
 
-  const handleShowCroppedImage = useCallback(async () => {
+  /*   const handleShowCroppedImage = useCallback(async () => {
     try {
       const croppedImageBlob = await getCroppedImg(imageSrc, croppedAreaPixels);
       console.log(croppedImageBlob, "check");
@@ -176,7 +176,46 @@ const ImageUploader = ({ aspectRatio, onUploadComplete, type }) => {
     } catch (e) {
       console.error(e);
     }
-  }, [imageSrc, croppedAreaPixels]);
+  }, [imageSrc, croppedAreaPixels]); */
+
+  const handleCropAndUpload = useCallback(async () => {
+    setIsUploading(true);
+    try {
+      if (!croppedAreaPixels) {
+        throw new Error("자르기 영역이 설정되지 않았습니다.");
+      }
+
+      const croppedImageBlob = await getCroppedImg(imageSrc, croppedAreaPixels);
+
+      const croppedImageFile = new File(
+        [croppedImageBlob],
+        `cropped-image-${Date.now()}.jpeg`,
+        {
+          type: "image/jpeg",
+        }
+      );
+
+      if (croppedImageFile.size < 100) {
+        throw new Error("잘라낸 이미지 파일이 너무 작거나 손상되었습니다.");
+      }
+      console.log(croppedImageFile);
+      if (type === "background") {
+        const finalImgUrl = await uploadBackgroundImage(croppedImageFile);
+        onUploadComplete(finalImgUrl);
+        reset();
+      } else {
+        const finalImgUrl = await uploadProfileImage(croppedImageFile);
+        onUploadComplete(finalImgUrl);
+        reset();
+      }
+      reset();
+    } catch (e) {
+      console.error("이미지 처리 또는 업로드 중 오류 발생:", e);
+      alert(e.message || "이미지 처리 중 오류가 발생했습니다.");
+    } finally {
+      setIsUploading(false);
+    }
+  }, [imageSrc, croppedAreaPixels, onUploadComplete]);
 
   const handleConfirmUpload = useCallback(async () => {
     setIsUploading(true);
@@ -283,7 +322,7 @@ const ImageUploader = ({ aspectRatio, onUploadComplete, type }) => {
             />
           </CropperContainer>
           <Controls>
-            <PrimaryButton onClick={handleShowCroppedImage}>
+            <PrimaryButton onClick={handleCropAndUpload}>
               적용하기
             </PrimaryButton>
             <SecondaryButton onClick={reset}>취소</SecondaryButton>

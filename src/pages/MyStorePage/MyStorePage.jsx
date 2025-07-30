@@ -51,7 +51,7 @@ const mockStores = [
 const PageContainer = styled.div`
   background-color: ${({ theme }) => theme.bg || "#FDFBF7"};
   padding: 2rem;
-  min-height: 100vh;
+  min-height: calc(100vh - 64px);
 `;
 
 const TitleContainer = styled.div`

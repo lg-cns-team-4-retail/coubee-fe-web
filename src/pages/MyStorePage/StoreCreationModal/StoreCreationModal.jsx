@@ -16,6 +16,7 @@ const FormLabel = styled.label`
   font-weight: 600;
   font-size: 0.9rem;
   color: #555;
+  margin-right: 10px;
 `;
 
 const FormInput = styled.input`
@@ -42,10 +43,22 @@ const ErrorMessage = styled.p`
   margin-top: 0.25rem;
 `;
 
-// --- 각 단계별 컴포넌트 ---
-// 컴포넌트를 StoreCreationModal 외부로 분리하여 불필요한 리렌더링을 방지합니다.
+const ImageContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+`;
 
-const Step1 = ({ data, onChange, onImageUpload, imagePreviewUrl, errors }) => {
+const Step1 = ({
+  data,
+  onChange,
+  onImageUpload,
+  onProfileImageUpload,
+  imagePreviewUrl,
+  errors,
+  resetImage,
+}) => {
   return (
     <StepContentWrapper>
       <div>
@@ -71,21 +84,58 @@ const Step1 = ({ data, onChange, onImageUpload, imagePreviewUrl, errors }) => {
 
       <div>
         <section>
-          <FormLabel>배경 이미지</FormLabel>
-          <ImageUploader
-            type={"background"}
-            aspectRatio={1 / 1}
-            onUploadComplete={onImageUpload}
-          />
-          {imagePreviewUrl && (
-            <img
-              src={imagePreviewUrl}
-              alt="배경 미리보기"
-              width="320"
-              style={{ marginTop: "1rem", borderRadius: "8px" }}
+          <FormLabel>가게 배경 이미지</FormLabel>
+          {data.backgroundImage && (
+            <ActionButton onClick={() => resetImage("background")}>
+              다시 업로드
+            </ActionButton>
+          )}
+          {!data.backgroundImage && (
+            <ImageUploader
+              type={"background"}
+              aspectRatio={16 / 9}
+              onUploadComplete={onImageUpload}
             />
           )}
         </section>
+        <ImageContainer>
+          {data.backgroundImage && (
+            <img
+              src={data.backgroundImage}
+              alt="가게 배경 미리보기"
+              height={"320px"}
+              style={{ marginTop: "1rem", borderRadius: "8px" }}
+            />
+          )}
+        </ImageContainer>
+      </div>
+
+      <div>
+        <section>
+          <FormLabel>가게 프로필 이미지</FormLabel>
+          {data.profileImage && (
+            <ActionButton onClick={() => resetImage("profile")}>
+              다시 업로드
+            </ActionButton>
+          )}
+          {!data.profileImage && (
+            <ImageUploader
+              type={"profile"}
+              aspectRatio={1 / 1}
+              onUploadComplete={onProfileImageUpload}
+            />
+          )}
+        </section>
+        <ImageContainer>
+          {data.profileImage && (
+            <img
+              src={data.profileImage}
+              alt="가게 배경 미리보기"
+              height={"240px"}
+              style={{ marginTop: "1rem", borderRadius: "8px" }}
+            />
+          )}
+        </ImageContainer>
       </div>
     </StepContentWrapper>
   );
@@ -363,6 +413,7 @@ const StoreCreationModal = ({ isOpen, onClose }) => {
     storeName: "",
     storeDesc: "",
     backgroundImage: null,
+    profileImage: null,
     bizNumber: "",
     ownerName: "",
     address: "",
@@ -373,8 +424,6 @@ const StoreCreationModal = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  // 이미지 파일이 변경될 때마다 미리보기 URL 생성 및 정리
-
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
@@ -384,6 +433,17 @@ const StoreCreationModal = ({ isOpen, onClose }) => {
         delete newErrors[id];
         return newErrors;
       });
+    }
+  };
+  const resetImage = (type) => {
+    if (type === "background") {
+      setFormData((prev) => ({ ...prev, backgroundImage: null }));
+    }
+    if (type === "businessImage") {
+      setFormData((prev) => ({ ...prev, businessImage: null }));
+    }
+    if (type === "profileImage") {
+      setFormData((prev) => ({ ...prev, profileImage: null }));
     }
   };
 
@@ -435,6 +495,9 @@ const StoreCreationModal = ({ isOpen, onClose }) => {
     setFormData((prev) => ({ ...prev, backgroundImage: file }));
     console.log(file);
   };
+  const handleProfileImageUpload = (file) => {
+    setFormData((prev) => ({ ...prev, profileImage: file }));
+  };
 
   const steps = [
     {
@@ -444,8 +507,10 @@ const StoreCreationModal = ({ isOpen, onClose }) => {
           data={formData}
           onChange={handleChange}
           onImageUpload={handleImageUpload}
+          onProfileImageUpload={handleProfileImageUpload}
           imagePreviewUrl={backgroundImagePreview}
           errors={errors}
+          resetImage={resetImage}
         />
       ),
     },
