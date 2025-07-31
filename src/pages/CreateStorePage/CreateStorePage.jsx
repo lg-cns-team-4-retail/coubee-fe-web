@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
 import { FaRegPaperPlane } from "react-icons/fa";
 import ProgressBar from "./components/ProgressBar";
@@ -6,6 +7,7 @@ import FirstStep from "./components/FirstStep";
 import SecondStep from "./components/SecondStep";
 import ThirdStep from "./components/ThirdStep";
 import PreviewComponent from "./components/PreviewComponent";
+import { registerStore } from "../../redux/slices/storeSlice";
 
 const MainContainer = styled.div`
   display: flex;
@@ -89,7 +91,8 @@ const CreateStorePage = () => {
     //사업자 정보
     bizOwnerName: "",
     bizNo: "",
-    bizImg: null,
+    bizImg:
+      "https://coubee-api.murkui.com/api/store/images/store/background/2b6708e1-494e-40d0-bb7a-d862e0779267.jpeg",
     //영업 정보
     contactNo: "",
     workingHour: "",
@@ -97,6 +100,10 @@ const CreateStorePage = () => {
     latitude: "",
     longitude: "",
   });
+  const dispatch = useDispatch();
+  const { loading, success, error, message, registeredStoreData } = useSelector(
+    (state) => state.store
+  );
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -222,8 +229,10 @@ const CreateStorePage = () => {
     setErrors({});
     setCurrentStep(step);
   };
-  const handleSubmit = () => {
+  const handleSubmit = (e) => {
     console.log("제출할 데이터:", formData);
+    e.preventDefault();
+    dispatch(registerStore(formData));
   };
 
   return (
@@ -270,6 +279,8 @@ const CreateStorePage = () => {
           )}
 
           {currentStep === 4 && <PreviewComponent data={formData} />}
+
+          {success && <h1>내가 성공!</h1>}
         </>
         <CreateActions>
           <SecondaryButton onClick={handlePrev} disabled={currentStep === 1}>
