@@ -4,6 +4,23 @@ import { FaRegPaperPlane } from "react-icons/fa";
 import coubeeIcon from "../../../assets/coubee.svg";
 import ImageUploader from "../../../components/ImageUploader";
 
+const CameraIcon = ({ size = 24, strokeWidth = 1.5 }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={strokeWidth}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
+    <circle cx="12" cy="13" r="3" />
+  </svg>
+);
+
 const StepContentWrapper = styled.div`
   padding: 1rem 0;
   min-height: 250px;
@@ -85,6 +102,7 @@ const Step1 = ({
       <div>
         <section>
           <FormLabel>가게 배경 이미지</FormLabel>
+
           {data.backgroundImage && (
             <ActionButton onClick={() => resetImage("background")}>
               다시 업로드
@@ -93,7 +111,7 @@ const Step1 = ({
           {!data.backgroundImage && (
             <ImageUploader
               type={"background"}
-              aspectRatio={16 / 9}
+              aspectRatio={16 / 6}
               onUploadComplete={onImageUpload}
             />
           )}
@@ -406,7 +424,6 @@ const ProgressBar = ({ currentStep, totalSteps, stepTitles }) => {
   );
 };
 
-// --- 메인 모달 컴포넌트 ---
 const StoreCreationModal = ({ isOpen, onClose }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -530,19 +547,7 @@ const StoreCreationModal = ({ isOpen, onClose }) => {
   ];
 
   const totalSteps = steps.length;
-  /*   useEffect(() => {
-    if (!formData.backgroundImage) {
-      setBackgroundImagePreview("");
-      return;
-    }
 
-    const objectUrl = URL.createObjectURL(formData.backgroundImage);
-    setBackgroundImagePreview(objectUrl);
-
-    return () => URL.revokeObjectURL(objectUrl);
-  }, [formData.backgroundImage]); */
-
-  console.log(formData, "check");
   return (
     <ModalBackdrop onClick={onClose}>
       <ModalContainer onClick={(e) => e.stopPropagation()}>

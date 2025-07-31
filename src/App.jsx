@@ -7,6 +7,7 @@ import Header from "./components/Header.jsx";
 import LoginPage from "./pages/LoginPage/LoginPage";
 import RegistrationPage from "./pages/RegistrationPage/RegistrationPage";
 import MyStorePage from "./pages/MyStorePage/MyStorePage";
+import CreateStorePage from "./pages/CreateStorePage/CreateStorePage";
 
 function App() {
   const [theme, setTheme] = useState("dark");
@@ -26,6 +27,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/registration" element={<RegistrationPage />} />
           <Route path="/my-store" element={<MyStorePage />} />
+          <Route path="/create-store" element={<CreateStorePage />} />
         </Routes>
       </main>
     </ThemeProvider>

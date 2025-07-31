@@ -23,7 +23,6 @@ const DropZone = styled.div`
   width: 100%;
   height: 200px;
   border: 2px dashed ${({ isDragging }) => (isDragging ? "#3b82f6" : "#d1d5db")};
-  border-radius: 10px;
   cursor: pointer;
   background-color: ${({ isDragging }) => (isDragging ? "#eff6ff" : "#f9fafb")};
   color: #6b7280;
@@ -58,7 +57,7 @@ const PreviewImage = styled.img`
 `;
 
 const Controls = styled.div`
-  padding-top: 1rem;
+  padding-bottom: 1rem;
   display: flex;
   justify-content: center;
   gap: 1rem;
@@ -89,10 +88,10 @@ const ActionButton = styled.button`
 `;
 
 const PrimaryButton = styled(ActionButton)`
-  background-color: #3b82f6;
+  background-color: ${({ theme }) => theme.primary};
   color: white;
   &:hover {
-    background-color: #2563eb;
+    background-color: ${({ theme }) => theme.secondary};
   }
 `;
 
@@ -310,6 +309,12 @@ const ImageUploader = ({ aspectRatio, onUploadComplete, type }) => {
     if (imageSrc && aspectRatio) {
       return (
         <>
+          <Controls>
+            <PrimaryButton onClick={handleCropAndUpload}>
+              적용하기
+            </PrimaryButton>
+            <SecondaryButton onClick={reset}>취소</SecondaryButton>
+          </Controls>
           <CropperContainer>
             <Cropper
               image={imageSrc}
@@ -321,12 +326,6 @@ const ImageUploader = ({ aspectRatio, onUploadComplete, type }) => {
               onCropComplete={onCropComplete}
             />
           </CropperContainer>
-          <Controls>
-            <PrimaryButton onClick={handleCropAndUpload}>
-              적용하기
-            </PrimaryButton>
-            <SecondaryButton onClick={reset}>취소</SecondaryButton>
-          </Controls>
         </>
       );
     }
