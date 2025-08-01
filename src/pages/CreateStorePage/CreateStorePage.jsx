@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
-import { FaRegPaperPlane } from "react-icons/fa";
 import ProgressBar from "./components/ProgressBar";
 import FirstStep from "./components/FirstStep";
 import SecondStep from "./components/SecondStep";
 import ThirdStep from "./components/ThirdStep";
 import PreviewComponent from "./components/PreviewComponent";
 import { registerStore } from "../../redux/slices/storeSlice";
+import Button from "../../components/common/Button";
+import SuccessComponent from "./components/SuccessComponent";
 
 const MainContainer = styled.div`
   display: flex;
@@ -16,15 +17,15 @@ const MainContainer = styled.div`
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  @media (max-width: 768px) {
-    padding: 1rem;
-  }
+  padding: 1rem;
 `;
 
 const ProgressContainer = styled.div`
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 2rem;
 `;
 
 const Title = styled.h3`
@@ -33,207 +34,193 @@ const Title = styled.h3`
   text-align: center;
   color: #333;
   @media (max-width: 768px) {
-    font-size: 1rem;
+    font-size: 1.2rem;
   }
 `;
 
-const CreateActions = styled.div`
+const ActionsContainer = styled.div`
   width: 100%;
   display: flex;
-  justify-content: end;
+  justify-content: flex-end;
   gap: 1rem;
-  margin: 1rem 0;
+  margin-top: 2rem;
   max-width: 800px;
 `;
-const ActionButton = styled.button`
-  background-color: ${({ theme }) => theme.primary};
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s;
 
-  &:hover {
-    opacity: 0.9;
-  }
-
-  &:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-  }
-`;
-
-const SecondaryButton = styled(ActionButton)`
-  background-color: #f0f0f0;
-  color: #555;
-  &:hover {
-    background-color: #e0e0e0;
-    opacity: 1;
-  }
-`;
-/**
- *
- * @returns
- * "https://coubee-api.murkui.com/api/store/images/store/background/2b6708e1-494e-40d0-bb7a-d862e0779267.jpeg",
- */
 const CreateStorePage = () => {
-  const [currentStep, setCurrentStep] = useState(4);
+  const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
-    //가게 정보
     storeName: "",
     storeDesc: "",
     storeTag: "",
     backgroundImage: null,
     profileImage: null,
-    //사업자 정보
     bizOwnerName: "",
     bizNo: "",
-    bizImg:
-      "https://coubee-api.murkui.com/api/store/images/store/background/2b6708e1-494e-40d0-bb7a-d862e0779267.jpeg",
-    //영업 정보
+    bizImg: null,
     contactNo: "",
     workingHour: "",
     storeAddress: "",
     latitude: "",
     longitude: "",
   });
+  const [errors, setErrors] = useState({});
+
   const dispatch = useDispatch();
-  const { loading, success, error, message, registeredStoreData } = useSelector(
-    (state) => state.store
-  );
+  const { success } = useSelector((state) => state.store);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
     if (errors[id]) {
-      setErrors((prevErrors) => {
-        const newErrors = { ...prevErrors };
-        delete newErrors[id];
-        return newErrors;
-      });
+      setErrors((prev) => ({ ...prev, [id]: null }));
     }
   };
-  const [errors, setErrors] = useState({});
+
   const resetImage = (type) => {
-    if (type === "background") {
-      setFormData((prev) => ({ ...prev, backgroundImage: null }));
-    }
-    if (type === "bizImg") {
-      setFormData((prev) => ({ ...prev, bizImg: null }));
-    }
-    if (type === "profileImage") {
-      setFormData((prev) => ({ ...prev, profileImage: null }));
-    }
+    setFormData((prev) => ({ ...prev, [type]: null }));
   };
+
   const handleImageUpload = (file) => {
     setFormData((prev) => ({ ...prev, backgroundImage: file }));
-    console.log(file);
   };
+
   const handleProfileImageUpload = (file) => {
     setFormData((prev) => ({ ...prev, profileImage: file }));
   };
+
   const handleBizImageUpload = (file) => {
     setFormData((prev) => ({ ...prev, bizImg: file }));
   };
+
   const handleAddressSelect = (address) => {
-    console.log(address, "check from store");
     setFormData((prev) => ({ ...prev, ...address }));
-    console.log(formData, "check from store");
-  };
-
-  const steps = [
-    {
-      title: "가게 정보",
-    },
-    {
-      title: "사업자 정보",
-    },
-    {
-      title: "영업 정보",
-    },
-    {
-      title: "최종 확인",
-    },
-  ];
-
-  const totalSteps = steps.length;
-
-  const validateStep = (step, data) => {
-    const newErrors = {};
-    switch (step) {
-      case 1:
-        if (!data.storeName.trim())
-          newErrors.storeName = "가게 이름을 입력해주세요.";
-        if (!data.storeDesc.trim())
-          newErrors.storeDesc = "가게 정보를 입력해주세요.";
-        break;
-      case 2:
-        if (!data.bizNo.trim()) {
-          newErrors.bizNo = "사업자 등록번호를 입력해주세요.";
-        }
-        if (!data.bizOwnerName.trim())
-          newErrors.bizOwnerName = "사업자 이름을 입력해주세요.";
-
-        if (!data.bizImg) newErrors.bizImg = "사업자 등록증을 올려주세요.";
-        break;
-      case 3:
-        if (!data.storeAddress.trim())
-          newErrors.storeAddress = "가게 위치를 입력해주세요.";
-        if (!data.workingHour.trim())
-          newErrors.workingHour = "영업 시간을 입력해주세요.";
-        if (!data.contactNo.trim())
-          newErrors.contactNo = "영업 시간을 입력해주세요.";
-
-        break;
-      default:
-        break;
-    }
-    return {
-      isValid: Object.keys(newErrors).length === 0,
-      errors: newErrors,
-    };
-  };
-
-  const handleNext = () => {
-    const { isValid, errors: newErrors } = validateStep(currentStep, formData);
-    console.log(newErrors);
-    setErrors(newErrors);
-    if (isValid) setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
-  };
-
-  const handlePrev = () => {
-    setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
 
   const handleStepClick = (step) => {
     if (step === currentStep) return;
 
+    // 뒤로 가는 경우, 유효성 검사 없이 이동
     if (step < currentStep) {
       setErrors({});
       setCurrentStep(step);
       return;
     }
 
-    for (let i = currentStep; i < step; i++) {
-      const { isValid, errors: newErrors } = validateStep(i, formData);
-      if (!isValid) {
-        setErrors(newErrors);
+    // 앞으로 가는 경우, 현재 단계부터 목표 단계까지 순차적으로 유효성 검사
+    for (let i = 1; i < step; i++) {
+      if (!validateStep(i)) {
+        // 유효성 검사에 실패한 첫 번째 단계로 이동
         setCurrentStep(i);
         return;
       }
     }
 
+    // 모든 중간 단계가 유효하면 목표 단계로 이동
     setErrors({});
     setCurrentStep(step);
   };
-  const handleSubmit = (e) => {
-    console.log("제출할 데이터:", formData);
-    e.preventDefault();
-    dispatch(registerStore(formData));
+
+  const steps = [
+    { title: "가게 정보" },
+    { title: "사업자 정보" },
+    { title: "영업 정보" },
+    { title: "최종 확인" },
+  ];
+
+  const totalSteps = steps.length;
+
+  const validateStep = (step) => {
+    const newErrors = {};
+    switch (step) {
+      case 1:
+        if (!formData.storeName.trim())
+          newErrors.storeName = "가게 이름을 입력해주세요.";
+        if (!formData.storeDesc.trim())
+          newErrors.storeDesc = "가게 설명을 입력해주세요.";
+        break;
+      case 2:
+        if (!formData.bizOwnerName.trim())
+          newErrors.bizOwnerName = "사업자 이름을 입력해주세요.";
+        if (!formData.bizNo.trim())
+          newErrors.bizNo = "사업자 등록번호를 입력해주세요.";
+        if (!formData.bizImg)
+          newErrors.bizImg = "사업자 등록증을 첨부해주세요.";
+        break;
+      case 3:
+        if (!formData.contactNo.trim())
+          newErrors.contactNo = "연락처를 입력해주세요.";
+        if (!formData.workingHour.trim())
+          newErrors.workingHour = "영업 시간을 입력해주세요.";
+        if (!formData.storeAddress.trim())
+          newErrors.storeAddress = "가게 주소를 입력해주세요.";
+        break;
+      default:
+        break;
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
+
+  const handleNext = () => {
+    if (validateStep(currentStep)) {
+      setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
+    }
+  };
+
+  const handlePrev = () => {
+    setCurrentStep((prev) => Math.max(prev - 1, 1));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (validateStep(1) && validateStep(2) && validateStep(3)) {
+      dispatch(registerStore(formData));
+    }
+  };
+
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <FirstStep
+            data={formData}
+            onChange={handleChange}
+            onImageUpload={handleImageUpload}
+            onProfileImageUpload={handleProfileImageUpload}
+            errors={errors}
+            resetImage={resetImage}
+          />
+        );
+      case 2:
+        return (
+          <SecondStep
+            data={formData}
+            onChange={handleChange}
+            onImageUpload={handleBizImageUpload}
+            errors={errors}
+            resetImage={resetImage}
+          />
+        );
+      case 3:
+        return (
+          <ThirdStep
+            data={formData}
+            onChange={handleChange}
+            onAddressSelect={handleAddressSelect}
+            errors={errors}
+          />
+        );
+      case 4:
+        return <PreviewComponent data={formData} />;
+      default:
+        return null;
+    }
+  };
+
+  if (success) {
+    return <SuccessComponent />;
+  }
 
   return (
     <>
@@ -247,51 +234,25 @@ const CreateStorePage = () => {
         />
       </ProgressContainer>
       <MainContainer>
-        <>
-          {currentStep === 1 && (
-            <FirstStep
-              data={formData}
-              onChange={handleChange}
-              onImageUpload={handleImageUpload}
-              onProfileImageUpload={handleProfileImageUpload}
-              errors={errors}
-              resetImage={resetImage}
-            />
-          )}
-
-          {currentStep === 2 && (
-            <SecondStep
-              data={formData}
-              onChange={handleChange}
-              onImageUpload={handleBizImageUpload}
-              errors={errors}
-              resetImage={resetImage}
-            />
-          )}
-
-          {currentStep === 3 && (
-            <ThirdStep
-              data={formData}
-              onChange={handleChange}
-              onAddressSelect={handleAddressSelect}
-              errors={errors}
-            />
-          )}
-
-          {currentStep === 4 && <PreviewComponent data={formData} />}
-
-          {success && <h1>내가 성공!</h1>}
-        </>
-        <CreateActions>
-          <SecondaryButton onClick={handlePrev} disabled={currentStep === 1}>
+        {renderStepContent()}
+        <ActionsContainer>
+          <Button
+            variant="secondary"
+            onClick={handlePrev}
+            disabled={currentStep === 1}
+          >
             이전
-          </SecondaryButton>
+          </Button>
           {currentStep === totalSteps ? (
-            <ActionButton onClick={handleSubmit}>제출</ActionButton>
+            <Button variant="primary" onClick={handleSubmit}>
+              제출하기
+            </Button>
           ) : (
-            <ActionButton onClick={handleNext}>다음</ActionButton>
+            <Button variant="primary" onClick={handleNext}>
+              다음
+            </Button>
           )}
-        </CreateActions>
+        </ActionsContainer>
       </MainContainer>
     </>
   );
