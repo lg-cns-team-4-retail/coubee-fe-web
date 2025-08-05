@@ -1,5 +1,5 @@
-import React from 'react';
-import styled, { keyframes } from 'styled-components';
+import React from "react";
+import styled, { keyframes } from "styled-components";
 
 const skeletonLoading = keyframes`
   0% {
@@ -11,7 +11,7 @@ const skeletonLoading = keyframes`
 `;
 
 const SkeletonContainer = styled.div`
-  max-width: 1024px;
+  max-width: 1200px;
   margin: 0 auto;
   background-color: white;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
@@ -87,7 +87,6 @@ const SkeletonStoreBranch = styled.div`
 
 const SkeletonTabNav = styled.div`
   margin-top: 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
 `;
 
 const SkeletonTabNavContainer = styled.div`
@@ -101,6 +100,28 @@ const SkeletonTabNavContainer = styled.div`
 const SkeletonTabButton = styled.div`
   width: 60px;
   height: 2rem;
+  border-radius: 0.25rem;
+  animation: ${skeletonLoading} 1s linear infinite alternate;
+`;
+
+const SkeletonDescriptionContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+  gap: 2rem;
+  flex-direction: column;
+`;
+
+const SkeletonTitle = styled.div`
+  width: 40%;
+  height: 1.5rem;
+  border-radius: 0.25rem;
+  animation: ${skeletonLoading} 1s linear infinite alternate;
+`;
+
+const SkeletonDescription = styled.div`
+  width: 100%;
+  height: 1rem;
   border-radius: 0.25rem;
   animation: ${skeletonLoading} 1s linear infinite alternate;
 `;
@@ -124,6 +145,14 @@ const StoreSkeleton = () => (
         </SkeletonTabNavContainer>
       </SkeletonTabNav>
     </SkeletonProfileSection>
+    <SkeletonDescriptionContainer>
+      {[...Array(3)].map((_, i) => (
+        <React.Fragment key={i}>
+          <SkeletonTitle />
+          <SkeletonDescription />
+        </React.Fragment>
+      ))}
+    </SkeletonDescriptionContainer>
   </SkeletonContainer>
 );
 

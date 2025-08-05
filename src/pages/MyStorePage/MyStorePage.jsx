@@ -61,15 +61,16 @@ export default function StoreListPage() {
         <Button onClick={handleCreateButtonClick}>매장 등록하기</Button>
       </TitleContainer>
       <CardGrid>
-        {storeList.map((item) => (
-          <StoreCard
-            onClick={() => {
-              navigate(`/view-store/${item.storeId}`);
-            }}
-            key={item.storeId}
-            data={item}
-          />
-        ))}
+        {storeList &&
+          storeList.map((item) => (
+            <StoreCard
+              onClick={() => {
+                navigate(`/view-store/${item.storeId}`);
+              }}
+              key={item.storeId}
+              data={item}
+            />
+          ))}
       </CardGrid>
     </PageContainer>
   );

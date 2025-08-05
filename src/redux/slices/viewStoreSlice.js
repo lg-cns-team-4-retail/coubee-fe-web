@@ -6,7 +6,7 @@ export const viewStoreDetail = createAsyncThunk(
   "store/viewStoreDetail",
   async (storeId, { rejectWithValue }) => {
     try {
-      const response = await apiClient.get(`/store/detail/${storeId}`);
+      const response = await apiClient.get(`/store/admin/detail/${storeId}`);
       if (response.data.code === "OK") {
         return response.data;
       } else {
@@ -44,6 +44,7 @@ const viewStoreSlice = createSlice({
         state.error = null;
       })
       .addCase(viewStoreDetail.fulfilled, (state, action) => {
+        console.log(action.payload, "slice check");
         state.loading = "succeeded";
         state.storeData = action.payload.data;
         state.message = action.payload.message;

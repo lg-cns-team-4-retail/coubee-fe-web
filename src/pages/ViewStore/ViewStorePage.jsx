@@ -9,6 +9,7 @@ import {
 import StoreSkeleton from "./components/StoreSkeleton";
 import NotificationModal from "../../components/NotificationModal";
 import { useNavigate } from "react-router-dom";
+import InformationSection from "./components/InformationSection";
 const IMG_BASE_URL = import.meta.env.VITE_IMG_URL;
 
 const Main = styled.main`
@@ -17,15 +18,16 @@ const Main = styled.main`
 `;
 
 const StoreContainer = styled.div`
-  max-width: 1024px;
+  max-width: 1200px;
   margin: 0 auto;
   background-color: white;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
     0 4px 6px -2px rgba(0, 0, 0, 0.05);
   border-bottom-left-radius: 0.5rem;
   border-bottom-right-radius: 0.5rem;
-  overflow: hidden;
-  min-height: calc(100vh - 64px);
+  height: calc(100vh - 64px);
+  display: flex;
+  flex-direction: column;
 `;
 
 const StoreBanner = styled.div`
@@ -34,27 +36,33 @@ const StoreBanner = styled.div`
   background-size: cover;
   background-position: center;
   background-image: url(${(props) => props.bgImage});
+  flex-shrink: 0;
   @media (min-width: 768px) {
     height: 16rem;
   }
 `;
 
-const ProfileSection = styled.div`
+const ProfileAndNavContainer = styled.div`
   padding: 1rem;
+  position: relative; // ProfileInfo의 z-index를 위해 추가
+  z-index: 10;
+  flex-shrink: 0; // 이 부분은 높이가 고정되도록 설정
   @media (min-width: 640px) {
     padding: 1.5rem;
   }
 `;
+const ContentWrapper = styled.div`
+  flex: 1;
+  overflow: hidden; // 이 컨테이너가 스크롤을 제어하도록 변경
+  padding: 0 1.5rem; // TabContent의 padding을 이곳으로 이동
+  display: flex;
+  flex-direction: column;
+`;
 
 const ProfileInfo = styled.div`
-  position: relative;
   display: flex;
   align-items: flex-end;
-  margin-top: -3rem;
-  z-index: 10;
-  @media (min-width: 640px) {
-    margin-top: -3rem;
-  }
+  margin-top: -3rem; // 배너 높이와 프로필 이미지 크기에 맞춰 조정
 `;
 
 const ProfileImage = styled.img`
@@ -73,6 +81,7 @@ const ProfileImage = styled.img`
 
 const StoreInfo = styled.div`
   margin-left: 1rem;
+  padding-bottom: 0.5rem; // TabNav와의 간격을 위해 추가
 `;
 
 const StoreName = styled.h1`
@@ -90,7 +99,7 @@ const StoreBranch = styled.p`
 `;
 
 const TabNav = styled.nav`
-  margin-top: 1.5rem;
+  margin-top: 0.5rem;
   border-bottom: 1px solid #e5e7eb;
 `;
 
@@ -121,19 +130,22 @@ const StyledTabButton = styled.button`
 `;
 
 const TabContent = styled.div`
-  padding: 2rem 0;
+  overflow-y: auto;
+  flex: 1; // ContentWrapper 내에서 남은 공간을 모두 차지
 `;
 
-const ViewStorePage = () => {
+const ViewStorePage = ({ mapReady }) => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [errorFetching, setErrorFetching] = useState(false);
 
-  const { loading, storeData, error } = useSelector((state) => state.viewStore);
+  const { /* loading,  */ storeData, error } = useSelector(
+    (state) => state.viewStore
+  );
   const [activeTab, setActiveTab] = useState("상품");
   const tabs = ["정보", "상품", "차트", "주문내역"];
-
+  const loading = "succeeded";
   const closeErrorModal = () => {
     setErrorFetching(false);
     dispatch(resetViewStoreStatus());
@@ -146,37 +158,37 @@ const ViewStorePage = () => {
 
   useEffect(() => {
     if (loading === "failed") {
-      console.log("check", errorFetching);
       setErrorFetching(true);
     }
   }, [loading]);
 
-  /*  if (loading === "pending" || !storeData) {
-    return (
-      <Main>
-        <StoreSkeleton />
-      </Main>
-    );
-  } */
+  const SectionRender = () => {
+    if (activeTab === "정보") {
+      return <InformationSection mapReady={mapReady} />;
+    }
+  };
 
   return (
     <Main>
       {loading === "pending" && <StoreSkeleton />}
       {loading === "succeeded" && (
         <StoreContainer>
-          <StoreBanner bgImage={IMG_BASE_URL + storeData.backImg} />
-          <ProfileSection>
+          <StoreBanner
+            bgImage={storeData ? IMG_BASE_URL + storeData.backImg : ""}
+          />
+
+          {/* --- ⬇️ JSX 구조 변경 ⬇️ --- */}
+          <ProfileAndNavContainer>
             <ProfileInfo>
               <ProfileImage
-                src={IMG_BASE_URL + storeData.profileImg}
+                src={storeData ? IMG_BASE_URL + storeData.profileImg : ""}
                 alt="가게 프로필 이미지"
               />
               <StoreInfo>
-                <StoreName>{storeData.storeName}</StoreName>
-                <StoreBranch>{storeData.branchName}</StoreBranch>
+                {/* <StoreName>{storeData.storeName}</StoreName> */}
+                <StoreName>{"가게"}</StoreName>
               </StoreInfo>
             </ProfileInfo>
-
             <TabNav>
               <TabNavContainer>
                 {tabs.map((tab) => (
@@ -190,371 +202,13 @@ const ViewStorePage = () => {
                 ))}
               </TabNavContainer>
             </TabNav>
+          </ProfileAndNavContainer>
 
+          <ContentWrapper>
             <TabContent>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                {activeTab} 콘텐츠가 여기에 표시됩니다.
-              </h2>
-              <p style={{ marginTop: "0.5rem", color: "#4b5563" }}>
-                전하의 명에 따라 이 부분은 현재 비워두었나이다.
-              </p>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                {activeTab} 콘텐츠가 여기에 표시됩니다.
-              </h2>
-              <p style={{ marginTop: "0.5rem", color: "#4b5563" }}>
-                전하의 명에 따라 이 부분은 현재 비워두었나이다.
-              </p>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                {activeTab} 콘텐츠가 여기에 표시됩니다.
-              </h2>
-              <p style={{ marginTop: "0.5rem", color: "#4b5563" }}>
-                전하의 명에 따라 이 부분은 현재 비워두었나이다.
-              </p>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                {activeTab} 콘텐츠가 여기에 표시됩니다.
-              </h2>
-              <p style={{ marginTop: "0.5rem", color: "#4b5563" }}>
-                전하의 명에 따라 이 부분은 현재 비워두었나이다.
-              </p>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                {activeTab} 콘텐츠가 여기에 표시됩니다.
-              </h2>
-              <p style={{ marginTop: "0.5rem", color: "#4b5563" }}>
-                전하의 명에 따라 이 부분은 현재 비워두었나이다.
-              </p>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                {activeTab} 콘텐츠가 여기에 표시됩니다.
-              </h2>
-              <p style={{ marginTop: "0.5rem", color: "#4b5563" }}>
-                전하의 명에 따라 이 부분은 현재 비워두었나이다.
-              </p>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                {activeTab} 콘텐츠가 여기에 표시됩니다.
-              </h2>
-              <p style={{ marginTop: "0.5rem", color: "#4b5563" }}>
-                전하의 명에 따라 이 부분은 현재 비워두었나이다.
-              </p>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                {activeTab} 콘텐츠가 여기에 표시됩니다.
-              </h2>
-              <p style={{ marginTop: "0.5rem", color: "#4b5563" }}>
-                전하의 명에 따라 이 부분은 현재 비워두었나이다.
-              </p>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                {activeTab} 콘텐츠가 여기에 표시됩니다.
-              </h2>
-              <p style={{ marginTop: "0.5rem", color: "#4b5563" }}>
-                전하의 명에 따라 이 부분은 현재 비워두었나이다.
-              </p>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                {activeTab} 콘텐츠가 여기에 표시됩니다.
-              </h2>
-              <p style={{ marginTop: "0.5rem", color: "#4b5563" }}>
-                전하의 명에 따라 이 부분은 현재 비워두었나이다.
-              </p>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                {activeTab} 콘텐츠가 여기에 표시됩니다.
-              </h2>
-              <p style={{ marginTop: "0.5rem", color: "#4b5563" }}>
-                전하의 명에 따라 이 부분은 현재 비워두었나이다.
-              </p>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                {activeTab} 콘텐츠가 여기에 표시됩니다.
-              </h2>
-              <p style={{ marginTop: "0.5rem", color: "#4b5563" }}>
-                전하의 명에 따라 이 부분은 현재 비워두었나이다.
-              </p>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                {activeTab} 콘텐츠가 여기에 표시됩니다.
-              </h2>
-              <p style={{ marginTop: "0.5rem", color: "#4b5563" }}>
-                전하의 명에 따라 이 부분은 현재 비워두었나이다.
-              </p>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                {activeTab} 콘텐츠가 여기에 표시됩니다.
-              </h2>
-              <p style={{ marginTop: "0.5rem", color: "#4b5563" }}>
-                전하의 명에 따라 이 부분은 현재 비워두었나이다.
-              </p>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                {activeTab} 콘텐츠가 여기에 표시됩니다.
-              </h2>
-              <p style={{ marginTop: "0.5rem", color: "#4b5563" }}>
-                전하의 명에 따라 이 부분은 현재 비워두었나이다.
-              </p>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                {activeTab} 콘텐츠가 여기에 표시됩니다.
-              </h2>
-              <p style={{ marginTop: "0.5rem", color: "#4b5563" }}>
-                전하의 명에 따라 이 부분은 현재 비워두었나이다.
-              </p>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                {activeTab} 콘텐츠가 여기에 표시됩니다.
-              </h2>
-              <p style={{ marginTop: "0.5rem", color: "#4b5563" }}>
-                전하의 명에 따라 이 부분은 현재 비워두었나이다.
-              </p>
-
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                {activeTab} 콘텐츠가 여기에 표시됩니다.
-              </h2>
-              <p style={{ marginTop: "0.5rem", color: "#4b5563" }}>
-                전하의 명에 따라 이 부분은 현재 비워두었나이다.
-              </p>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                {activeTab} 콘텐츠가 여기에 표시됩니다.
-              </h2>
-              <p style={{ marginTop: "0.5rem", color: "#4b5563" }}>
-                전하의 명에 따라 이 부분은 현재 비워두었나이다.
-              </p>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                {activeTab} 콘텐츠가 여기에 표시됩니다.
-              </h2>
-              <p style={{ marginTop: "0.5rem", color: "#4b5563" }}>
-                전하의 명에 따라 이 부분은 현재 비워두었나이다.
-              </p>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                {activeTab} 콘텐츠가 여기에 표시됩니다.
-              </h2>
-              <p style={{ marginTop: "0.5rem", color: "#4b5563" }}>
-                전하의 명에 따라 이 부분은 현재 비워두었나이다.
-              </p>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                {activeTab} 콘텐츠가 여기에 표시됩니다.
-              </h2>
-              <p style={{ marginTop: "0.5rem", color: "#4b5563" }}>
-                전하의 명에 따라 이 부분은 현재 비워두었나이다.
-              </p>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                {activeTab} 콘텐츠가 여기에 표시됩니다.
-              </h2>
-              <p style={{ marginTop: "0.5rem", color: "#4b5563" }}>
-                전하의 명에 따라 이 부분은 현재 비워두었나이다.
-              </p>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                {activeTab} 콘텐츠가 여기에 표시됩니다.
-              </h2>
-              <p style={{ marginTop: "0.5rem", color: "#4b5563" }}>
-                전하의 명에 따라 이 부분은 현재 비워두었나이다.
-              </p>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                {activeTab} 콘텐츠가 여기에 표시됩니다.
-              </h2>
-              <p style={{ marginTop: "0.5rem", color: "#4b5563" }}>
-                전하의 명에 따라 이 부분은 현재 비워두었나이다.
-              </p>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                {activeTab} 콘텐츠가 여기에 표시됩니다.
-              </h2>
-              <p style={{ marginTop: "0.5rem", color: "#4b5563" }}>
-                전하의 명에 따라 이 부분은 현재 비워두었나이다.
-              </p>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                {activeTab} 콘텐츠가 여기에 표시됩니다.
-              </h2>
-              <p style={{ marginTop: "0.5rem", color: "#4b5563" }}>
-                전하의 명에 따라 이 부분은 현재 비워두었나이다.
-              </p>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                {activeTab} 콘텐츠가 여기에 표시됩니다.
-              </h2>
-              <p style={{ marginTop: "0.5rem", color: "#4b5563" }}>
-                전하의 명에 따라 이 부분은 현재 비워두었나이다.
-              </p>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                {activeTab} 콘텐츠가 여기에 표시됩니다.
-              </h2>
-              <p style={{ marginTop: "0.5rem", color: "#4b5563" }}>
-                전하의 명에 따라 이 부분은 현재 비워두었나이다.
-              </p>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                {activeTab} 콘텐츠가 여기에 표시됩니다.
-              </h2>
-              <p style={{ marginTop: "0.5rem", color: "#4b5563" }}>
-                전하의 명에 따라 이 부분은 현재 비워두었나이다.
-              </p>
+              <SectionRender />
             </TabContent>
-          </ProfileSection>
+          </ContentWrapper>
         </StoreContainer>
       )}
 
