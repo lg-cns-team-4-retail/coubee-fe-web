@@ -32,7 +32,6 @@ export const registerUser = createAsyncThunk(
     try {
       const response = await apiClient.post("/user/auth/signup", registerData);
       const responseData = response.data.data;
-
       return responseData;
     } catch (error) {
       console.error("회원가입 실패 응답:", error.response.data);
@@ -59,7 +58,6 @@ const userSlice = createSlice({
       state.profileImage = "";
       state.status = "idle";
       state.error = null;
-
       if (typeof window !== "undefined") {
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");

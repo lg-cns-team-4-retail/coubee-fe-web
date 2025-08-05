@@ -2,7 +2,11 @@ import React, { useState, useCallback, useRef } from "react";
 import styled from "styled-components";
 import Cropper from "react-easy-crop";
 import { getCroppedImg } from "./cropImage";
-import { uploadBackgroundImage, uploadProfileImage } from "../api/imgApi";
+import {
+  uploadBackgroundImage,
+  uploadProfileImage,
+  uploadCertificateImage,
+} from "../api/imgApi";
 // --- Styled Components Definition ---
 
 const Container = styled.div`
@@ -155,7 +159,8 @@ const ImageUploader = ({ aspectRatio, onUploadComplete, type }) => {
   const handleDirectUpload = async (file) => {
     setIsUploading(true);
     try {
-      onUploadComplete(file);
+      const finalImgUrl = await uploadCertificateImage(file);
+      onUploadComplete(finalImgUrl);
     } catch (error) {
       console.error("Upload failed:", error);
     } finally {
@@ -202,8 +207,14 @@ const ImageUploader = ({ aspectRatio, onUploadComplete, type }) => {
         const finalImgUrl = await uploadBackgroundImage(croppedImageFile);
         onUploadComplete(finalImgUrl);
         reset();
-      } else {
+      }
+      if (type === "profile") {
         const finalImgUrl = await uploadProfileImage(croppedImageFile);
+        onUploadComplete(finalImgUrl);
+        reset();
+      }
+      if (type === "bizImg") {
+        const finalImgUrl = await uploadCertificateImage(croppedImageFile);
         onUploadComplete(finalImgUrl);
         reset();
       }
@@ -237,8 +248,14 @@ const ImageUploader = ({ aspectRatio, onUploadComplete, type }) => {
         const finalImgUrl = await uploadBackgroundImage(croppedImageFile);
         onUploadComplete(finalImgUrl);
         reset();
-      } else {
+      }
+      if (type === "profile") {
         const finalImgUrl = await uploadProfileImage(croppedImageFile);
+        onUploadComplete(finalImgUrl);
+        reset();
+      }
+      if (type === "bizImg") {
+        const finalImgUrl = await uploadCertificateImage(croppedImageFile);
         onUploadComplete(finalImgUrl);
         reset();
       }
@@ -288,11 +305,12 @@ const ImageUploader = ({ aspectRatio, onUploadComplete, type }) => {
   };
 
   const renderContent = () => {
+    console.log(imageSrc, "check");
     if (isUploading) {
       return <LoadingSpinner>업로드 중...</LoadingSpinner>;
     }
 
-    if (croppedImage) {
+    /* if (croppedImage) {
       return (
         <PreviewContainer>
           <PreviewImage src={croppedImage} alt="Cropped Preview" />
@@ -304,7 +322,7 @@ const ImageUploader = ({ aspectRatio, onUploadComplete, type }) => {
           </Controls>
         </PreviewContainer>
       );
-    }
+    } */
 
     if (imageSrc && aspectRatio) {
       return (

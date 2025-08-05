@@ -4,16 +4,21 @@ import storage from "redux-persist/lib/storage";
 
 import userReducer from "./slices/userSlice";
 import storeReducer from "./slices/storeSlice";
+import myStoreReducer from "./slices/myStoreSlice";
+import viewStoreReducer from "./slices/viewStoreSlice";
+
 const persistConfig = {
   key: "root",
   version: 1,
   storage,
-  whitelist: ["user"],
+  whitelist: ["user", "store", "myStore", "viewStore"],
 };
 
 const rootReducer = combineReducers({
   user: userReducer,
   store: storeReducer,
+  myStore: myStoreReducer,
+  viewStore: viewStoreReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

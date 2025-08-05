@@ -100,6 +100,7 @@ const ChangeImageButton = styled.button`
 `;
 
 const SecondStep = ({ data, onChange, onImageUpload, errors, resetImage }) => {
+  console.log(data);
   return (
     <StepContainer>
       <Section>
@@ -139,7 +140,11 @@ const SecondStep = ({ data, onChange, onImageUpload, errors, resetImage }) => {
               <ImagePreview src={data.bizImg} alt="사업자 등록증" />
             </ImagePreviewContainer>
           ) : (
-            <ImageUploader type={"bizImg"} onUploadComplete={onImageUpload} />
+            <ImageUploader
+              type={"bizImg"}
+              aspectRatio={10 / 16}
+              onUploadComplete={onImageUpload}
+            />
           )}
         </div>
         {errors.bizImg && <ErrorMessage>{errors.bizImg}</ErrorMessage>}

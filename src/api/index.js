@@ -33,7 +33,6 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use(
   (config) => {
     const token = getToken();
-    console.log(token);
     if (token) {
       config.headers["Authorization"] = `Bearer ${token}`;
     }
@@ -43,6 +42,7 @@ apiClient.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+``;
 
 apiClient.interceptors.response.use(
   (response) => {
@@ -61,13 +61,12 @@ apiClient.interceptors.response.use(
       try {
         const refreshToken = getRefreshToken();
         const { data } = await axios.post(
-          "/api/user/auth/refresh",
+          API_BASE_URL + "/user/auth/refresh",
           { token: refreshToken },
           { withCredentials: true }
         );
 
         const newAccessToken = data.data.access.token;
-        console.log(data.data.access.token);
         setToken(newAccessToken);
 
         apiClient.defaults.headers.common[
@@ -81,8 +80,8 @@ apiClient.interceptors.response.use(
           "토큰 갱신에 실패하여 로그아웃 처리합니다:",
           refreshError
         );
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
+        /*    localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken"); */
 
         return Promise.reject(refreshError);
       }

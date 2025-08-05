@@ -7,7 +7,7 @@ const StyledText = styled.p`
 
   ${({ theme, variant = "body" }) => theme.typography[variant] || ""}
 
-  color: ${({ theme, color }) => theme[color] || theme.text};
+  color: ${({ theme, color }) => theme[color] || theme.color};
 
   font-weight: ${({ theme, weight }) =>
     theme.font.weight[weight] || theme.font.weight.regular};

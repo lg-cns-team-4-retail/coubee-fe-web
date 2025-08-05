@@ -113,7 +113,7 @@ const typography = {
   p: css`
     font-size: ${({ theme }) => theme.font.size.caption}; /* 1rem */
     @media (max-width: 768px) {
-      font-size: 0.5rem;
+      font-size: 0.7rem;
     }
   `,
   body: css`

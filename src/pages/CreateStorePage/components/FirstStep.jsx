@@ -131,19 +131,21 @@ const FirstStep = ({
           {errors.storeName && <ErrorMessage>{errors.storeName}</ErrorMessage>}
         </div>
         <div style={{ marginTop: "1rem" }}>
-          <FormLabel required htmlFor="storeDesc">
+          <FormLabel required htmlFor="description">
             가게 정보
           </FormLabel>
           <FormTextArea
-            id="storeDesc"
+            id="description"
             placeholder="가게를 소개해주세요."
-            value={data.storeDesc}
+            value={data.description}
             onChange={onChange}
           />
-          {errors.storeDesc && <ErrorMessage>{errors.storeDesc}</ErrorMessage>}
+          {errors.description && (
+            <ErrorMessage>{errors.description}</ErrorMessage>
+          )}
         </div>
         <div>
-          <FormLabel htmlFor="storeName">가게 태그</FormLabel>
+          <FormLabel htmlFor="storeTag">가게 태그</FormLabel>
           <FormInput
             id="storeTag"
             placeholder="가게를 대표하는 태그를 작성해보세요. 예: 신선도 최고,당도 보장"
@@ -157,15 +159,15 @@ const FirstStep = ({
       <Section>
         <FormLabel>
           가게 배경 이미지
-          {data.backgroundImage && (
-            <ChangeImageButton onClick={() => resetImage("background")}>
+          {data.backImg && (
+            <ChangeImageButton onClick={() => resetImage("backImg")}>
               이미지 변경
             </ChangeImageButton>
           )}
         </FormLabel>
-        {data.backgroundImage ? (
+        {data.backImg ? (
           <ImagePreviewContainer>
-            <ImagePreview src={data.backgroundImage} alt="가게 배경 미리보기" />
+            <ImagePreview src={data.backImg} alt="가게 배경 미리보기" />
           </ImagePreviewContainer>
         ) : (
           <ImageUploader
@@ -179,16 +181,16 @@ const FirstStep = ({
       <Section>
         <FormLabel>
           가게 프로필 이미지
-          {data.profileImage && (
-            <ChangeImageButton onClick={() => resetImage("profileImage")}>
+          {data.profileImg && (
+            <ChangeImageButton onClick={() => resetImage("profileImg")}>
               이미지 변경
             </ChangeImageButton>
           )}
         </FormLabel>
-        {data.profileImage ? (
+        {data.profileImg ? (
           <ImagePreviewContainer>
             <ProfileImagePreview
-              src={data.profileImage}
+              src={data.profileImg}
               alt="가게 프로필 미리보기"
             />
           </ImagePreviewContainer>

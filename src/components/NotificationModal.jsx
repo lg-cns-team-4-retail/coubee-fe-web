@@ -106,7 +106,7 @@ const NotificationModal = ({
   };
 
   return (
-    <ModalBackdrop onClick={onClose}>
+    <ModalBackdrop>
       <ModalContainer onClick={(e) => e.stopPropagation()}>
         <ModalIcon type={modalType} />
         <ModalTitle>{title}</ModalTitle>

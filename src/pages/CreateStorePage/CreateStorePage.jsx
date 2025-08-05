@@ -9,6 +9,8 @@ import PreviewComponent from "./components/PreviewComponent";
 import { registerStore } from "../../redux/slices/storeSlice";
 import Button from "../../components/common/Button";
 import SuccessComponent from "./components/SuccessComponent";
+import { resetRegisterStatus } from "../../redux/slices/storeSlice";
+import { useNavigate } from "react-router-dom";
 
 const MainContainer = styled.div`
   display: flex;
@@ -48,13 +50,14 @@ const ActionsContainer = styled.div`
 `;
 
 const CreateStorePage = () => {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     storeName: "",
-    storeDesc: "",
+    description: "",
     storeTag: "",
-    backgroundImage: null,
-    profileImage: null,
+    backImg: null,
+    profileImg: null,
     bizOwnerName: "",
     bizNo: "",
     bizImg: null,
@@ -68,7 +71,6 @@ const CreateStorePage = () => {
 
   const dispatch = useDispatch();
   const { success } = useSelector((state) => state.store);
-
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
@@ -82,11 +84,11 @@ const CreateStorePage = () => {
   };
 
   const handleImageUpload = (file) => {
-    setFormData((prev) => ({ ...prev, backgroundImage: file }));
+    setFormData((prev) => ({ ...prev, backImg: file }));
   };
 
   const handleProfileImageUpload = (file) => {
-    setFormData((prev) => ({ ...prev, profileImage: file }));
+    setFormData((prev) => ({ ...prev, profileImg: file }));
   };
 
   const handleBizImageUpload = (file) => {
@@ -100,7 +102,6 @@ const CreateStorePage = () => {
   const handleStepClick = (step) => {
     if (step === currentStep) return;
 
-    // 뒤로 가는 경우, 유효성 검사 없이 이동
     if (step < currentStep) {
       setErrors({});
       setCurrentStep(step);
@@ -136,8 +137,8 @@ const CreateStorePage = () => {
       case 1:
         if (!formData.storeName.trim())
           newErrors.storeName = "가게 이름을 입력해주세요.";
-        if (!formData.storeDesc.trim())
-          newErrors.storeDesc = "가게 설명을 입력해주세요.";
+        if (!formData.description.trim())
+          newErrors.description = "가게 설명을 입력해주세요.";
         break;
       case 2:
         if (!formData.bizOwnerName.trim())
@@ -173,12 +174,17 @@ const CreateStorePage = () => {
   };
 
   const handleSubmit = (e) => {
+    console.log(formData, "check store");
     e.preventDefault();
     if (validateStep(1) && validateStep(2) && validateStep(3)) {
       dispatch(registerStore(formData));
     }
   };
+  const handleFinish = () => {
+    dispatch(resetRegisterStatus());
 
+    navigate("/my-store");
+  };
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
@@ -219,7 +225,7 @@ const CreateStorePage = () => {
   };
 
   if (success) {
-    return <SuccessComponent />;
+    return <SuccessComponent onConfirm={handleFinish} />;
   }
 
   return (
