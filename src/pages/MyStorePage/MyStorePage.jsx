@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -37,25 +37,26 @@ const CardGrid = styled.div`
   }
 `;
 
-export default function StoreListPage() {
+const MyStorePage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const storeList = useSelector((state) => state.myStore.storeList);
+  const userInfo = useSelector((state) => state.user.userInfo);
 
   const handleCreateButtonClick = () => {
-    window.location.href = "/create-store";
+    navigate("/create-store");
   };
 
   useEffect(() => {
     dispatch(getStoreList());
     dispatch(resetViewStoreStatus());
-  }, []);
+  }, [dispatch]);
 
   return (
     <PageContainer>
       <TitleContainer>
         <Text variant="h4" weight="bold">
-          환진님의 매장 정보
+          {userInfo?.name || "사용자"}님의 매장 정보
         </Text>
 
         <Button onClick={handleCreateButtonClick}>매장 등록하기</Button>
@@ -74,4 +75,6 @@ export default function StoreListPage() {
       </CardGrid>
     </PageContainer>
   );
-}
+};
+
+export default MyStorePage;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   resetViewStoreStatus,
@@ -8,9 +8,9 @@ import {
 } from "../../redux/slices/viewStoreSlice";
 import StoreSkeleton from "./components/StoreSkeleton";
 import NotificationModal from "../../components/NotificationModal";
-import { useNavigate } from "react-router-dom";
 import InformationSection from "./components/InformationSection";
 import ItemSection from "./components/ItemSection";
+import useKakaoLoader from "../../components/useKakaoLoader";
 const IMG_BASE_URL = import.meta.env.VITE_IMG_URL;
 
 const Main = styled.main`
@@ -45,17 +45,18 @@ const StoreBanner = styled.div`
 
 const ProfileAndNavContainer = styled.div`
   padding: 1rem;
-  position: relative; // ProfileInfo의 z-index를 위해 추가
+  position: relative;
   z-index: 10;
-  flex-shrink: 0; // 이 부분은 높이가 고정되도록 설정
+  flex-shrink: 0;
   @media (min-width: 640px) {
     padding: 1.5rem;
   }
 `;
+
 const ContentWrapper = styled.div`
   flex: 1;
-  overflow: hidden; // 이 컨테이너가 스크롤을 제어하도록 변경
-  padding: 0 1.5rem; // TabContent의 padding을 이곳으로 이동
+  overflow: hidden;
+  padding: 0 1.5rem;
   display: flex;
   flex-direction: column;
 `;
@@ -63,7 +64,7 @@ const ContentWrapper = styled.div`
 const ProfileInfo = styled.div`
   display: flex;
   align-items: flex-end;
-  margin-top: -3rem; // 배너 높이와 프로필 이미지 크기에 맞춰 조정
+  margin-top: -3rem;
 `;
 
 const ProfileImage = styled.img`
@@ -82,7 +83,7 @@ const ProfileImage = styled.img`
 
 const StoreInfo = styled.div`
   margin-left: 1rem;
-  padding-bottom: 0.5rem; // TabNav와의 간격을 위해 추가
+  padding-bottom: 0.5rem;
 `;
 
 const StoreName = styled.h1`
@@ -92,11 +93,6 @@ const StoreName = styled.h1`
   @media (min-width: 640px) {
     font-size: 1.875rem;
   }
-`;
-
-const StoreBranch = styled.p`
-  font-size: 0.875rem;
-  color: #6b7280;
 `;
 
 const TabNav = styled.nav`
@@ -132,56 +128,46 @@ const StyledTabButton = styled.button`
 
 const TabContent = styled.div`
   overflow-y: auto;
-  flex: 1; // ContentWrapper 내에서 남은 공간을 모두 차지
+  flex: 1;
 `;
 
-const ViewStorePage = ({ mapReady }) => {
+const TABS = {
+  정보: InformationSection,
+  상품: ItemSection,
+  차트: () => <div>차트 정보</div>, // Placeholder
+  주문내역: () => <div>주문 내역</div>, // Placeholder
+};
+
+const ViewStorePage = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [errorFetching, setErrorFetching] = useState(false);
+  const [mapLoading] = useKakaoLoader();
 
   const { loading, storeData, error } = useSelector((state) => state.viewStore);
   const [activeTab, setActiveTab] = useState("상품");
-  const tabs = ["정보", "상품", "차트", "주문내역"];
+
   const closeErrorModal = () => {
-    setErrorFetching(false);
     dispatch(resetViewStoreStatus());
     navigate("/my-store");
   };
 
   useEffect(() => {
     dispatch(viewStoreDetail(id));
-  }, []);
+  }, [dispatch, id]);
 
-  useEffect(() => {
-    if (loading === "failed") {
-      setErrorFetching(true);
-    }
-  }, [loading]);
-
-  const SectionRender = () => {
-    if (activeTab === "정보") {
-      return <InformationSection mapReady={mapReady} />;
-    }
-
-    if (activeTab === "상품") {
-      return <ItemSection />;
-    }
-  };
+  const ActiveSection = TABS[activeTab];
 
   return (
     <Main>
       {(loading === "pending" || loading === "idle") && <StoreSkeleton />}
-      {loading === "succeeded" && (
+      {loading === "succeeded" && storeData && (
         <StoreContainer>
-          <StoreBanner
-            bgImage={storeData ? IMG_BASE_URL + storeData.backImg : ""}
-          />
+          <StoreBanner bgImage={`${IMG_BASE_URL}${storeData.backImg}`} />
           <ProfileAndNavContainer>
             <ProfileInfo>
               <ProfileImage
-                src={storeData ? IMG_BASE_URL + storeData.profileImg : ""}
+                src={`${IMG_BASE_URL}${storeData.profileImg}`}
                 alt="가게 프로필 이미지"
               />
               <StoreInfo>
@@ -190,7 +176,7 @@ const ViewStorePage = ({ mapReady }) => {
             </ProfileInfo>
             <TabNav>
               <TabNavContainer>
-                {tabs.map((tab) => (
+                {Object.keys(TABS).map((tab) => (
                   <StyledTabButton
                     key={tab}
                     active={activeTab === tab}
@@ -205,14 +191,14 @@ const ViewStorePage = ({ mapReady }) => {
 
           <ContentWrapper>
             <TabContent>
-              <SectionRender />
+              <ActiveSection mapReady={!mapLoading} />
             </TabContent>
           </ContentWrapper>
         </StoreContainer>
       )}
 
       <NotificationModal
-        isOpen={errorFetching}
+        isOpen={!!error}
         onClose={closeErrorModal}
         title={"매장 정보 불러오기 실패"}
         message={error}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
 import { GlobalStyle, lightTheme, darkTheme } from "./styles/theme";
@@ -8,19 +8,16 @@ import LoginPage from "./pages/LoginPage/LoginPage";
 import RegistrationPage from "./pages/RegistrationPage/RegistrationPage";
 import MyStorePage from "./pages/MyStorePage/MyStorePage";
 import CreateStorePage from "./pages/CreateStorePage/CreateStorePage";
-import ViewStorePage from "./pages/ViewStore/ViewStorePAge";
-
-const KAKAO_MAP_API_KEY = import.meta.env.VITE_KAKAO_MAP_API_KEY;
+import ViewStorePage from "./pages/ViewStore/ViewStorePage";
+import ComponentPreview from "./pages/ComponentPreview";
 
 function App() {
-  const [theme, setTheme] = useState("dark");
-  const currentTheme = theme === "dark" ? lightTheme : darkTheme;
+  const [theme, setTheme] = useState("light");
+  const currentTheme = theme === "light" ? lightTheme : darkTheme;
 
   const toggleTheme = () => {
-    setTheme(theme === "dark" ? "dark" : "light");
+    setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
   };
-
-  const [mapLoaded, setMapLoaded] = useState(false);
 
   return (
     <ThemeProvider theme={currentTheme}>
@@ -28,16 +25,12 @@ function App() {
       <Header />
       <main>
         <Routes>
-          {/* <Route path="/" element={<HomePage />} /> */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/registration" element={<RegistrationPage />} />
           <Route path="/my-store" element={<MyStorePage />} />
           <Route path="/create-store" element={<CreateStorePage />} />
-          <Route path="/create-store" element={<CreateStorePage />} />
-          <Route
-            path="/view-store/:id"
-            element={<ViewStorePage mapReady={mapLoaded} />}
-          />
+          <Route path="/view-store/:id" element={<ViewStorePage />} />
+          <Route path="/component" element={<ComponentPreview />} />
         </Routes>
       </main>
     </ThemeProvider>
