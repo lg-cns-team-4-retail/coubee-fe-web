@@ -6,8 +6,8 @@ import {
   uploadBackgroundImage,
   uploadProfileImage,
   uploadCertificateImage,
+  uploadProductImage,
 } from "../api/imgApi";
-// --- Styled Components Definition ---
 
 const Container = styled.div`
   width: 100%;
@@ -172,16 +172,6 @@ const ImageUploader = ({ aspectRatio, onUploadComplete, type }) => {
     setCroppedAreaPixels(croppedAreaPixels);
   }, []);
 
-  /*   const handleShowCroppedImage = useCallback(async () => {
-    try {
-      const croppedImageBlob = await getCroppedImg(imageSrc, croppedAreaPixels);
-      console.log(croppedImageBlob, "check");
-      setCroppedImage(croppedImageBlob);
-    } catch (e) {
-      console.error(e);
-    }
-  }, [imageSrc, croppedAreaPixels]); */
-
   const handleCropAndUpload = useCallback(async () => {
     setIsUploading(true);
     try {
@@ -218,49 +208,15 @@ const ImageUploader = ({ aspectRatio, onUploadComplete, type }) => {
         onUploadComplete(finalImgUrl);
         reset();
       }
+      if (type === "productImg") {
+        const finalImgUrl = await uploadProductImage(croppedImageFile);
+        onUploadComplete(finalImgUrl);
+        reset();
+      }
       reset();
     } catch (e) {
       console.error("이미지 처리 또는 업로드 중 오류 발생:", e);
       alert(e.message || "이미지 처리 중 오류가 발생했습니다.");
-    } finally {
-      setIsUploading(false);
-    }
-  }, [imageSrc, croppedAreaPixels, onUploadComplete]);
-
-  const handleConfirmUpload = useCallback(async () => {
-    setIsUploading(true);
-    try {
-      const croppedImageBlob = await getCroppedImg(
-        imageSrc,
-        croppedAreaPixels,
-        true
-      );
-
-      const croppedImageFile = new File(
-        [croppedImageBlob],
-        `cropped-image-${Date.now()}.png`,
-        {
-          type: "image/*",
-        }
-      );
-
-      if (type === "background") {
-        const finalImgUrl = await uploadBackgroundImage(croppedImageFile);
-        onUploadComplete(finalImgUrl);
-        reset();
-      }
-      if (type === "profile") {
-        const finalImgUrl = await uploadProfileImage(croppedImageFile);
-        onUploadComplete(finalImgUrl);
-        reset();
-      }
-      if (type === "bizImg") {
-        const finalImgUrl = await uploadCertificateImage(croppedImageFile);
-        onUploadComplete(finalImgUrl);
-        reset();
-      }
-    } catch (e) {
-      console.error(e);
     } finally {
       setIsUploading(false);
     }
@@ -309,20 +265,6 @@ const ImageUploader = ({ aspectRatio, onUploadComplete, type }) => {
     if (isUploading) {
       return <LoadingSpinner>업로드 중...</LoadingSpinner>;
     }
-
-    /* if (croppedImage) {
-      return (
-        <PreviewContainer>
-          <PreviewImage src={croppedImage} alt="Cropped Preview" />
-          <Controls>
-            <PrimaryButton onClick={handleConfirmUpload}>확인</PrimaryButton>
-            <SecondaryButton onClick={() => setCroppedImage(null)}>
-              다시 선택
-            </SecondaryButton>
-          </Controls>
-        </PreviewContainer>
-      );
-    } */
 
     if (imageSrc && aspectRatio) {
       return (

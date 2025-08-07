@@ -2,6 +2,8 @@ import React from "react";
 import styled from "styled-components";
 import ImageUploader from "../../../components/ImageUploader";
 
+const IMG_BASE_URL = import.meta.env.VITE_IMG_URL;
+
 const StepContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -137,7 +139,10 @@ const SecondStep = ({ data, onChange, onImageUpload, errors, resetImage }) => {
           </FormLabel>
           {data.bizImg ? (
             <ImagePreviewContainer>
-              <ImagePreview src={data.bizImg} alt="사업자 등록증" />
+              <ImagePreview
+                src={IMG_BASE_URL + data.bizImg}
+                alt="사업자 등록증"
+              />
             </ImagePreviewContainer>
           ) : (
             <ImageUploader

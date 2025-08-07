@@ -10,6 +10,7 @@ import StoreSkeleton from "./components/StoreSkeleton";
 import NotificationModal from "../../components/NotificationModal";
 import { useNavigate } from "react-router-dom";
 import InformationSection from "./components/InformationSection";
+import ItemSection from "./components/ItemSection";
 const IMG_BASE_URL = import.meta.env.VITE_IMG_URL;
 
 const Main = styled.main`
@@ -20,7 +21,7 @@ const Main = styled.main`
 const StoreContainer = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  background-color: white;
+  background-color: #f2f3f7;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
     0 4px 6px -2px rgba(0, 0, 0, 0.05);
   border-bottom-left-radius: 0.5rem;
@@ -140,12 +141,9 @@ const ViewStorePage = ({ mapReady }) => {
   const navigate = useNavigate();
   const [errorFetching, setErrorFetching] = useState(false);
 
-  const { /* loading,  */ storeData, error } = useSelector(
-    (state) => state.viewStore
-  );
+  const { loading, storeData, error } = useSelector((state) => state.viewStore);
   const [activeTab, setActiveTab] = useState("상품");
   const tabs = ["정보", "상품", "차트", "주문내역"];
-  const loading = "succeeded";
   const closeErrorModal = () => {
     setErrorFetching(false);
     dispatch(resetViewStoreStatus());
@@ -166,18 +164,20 @@ const ViewStorePage = ({ mapReady }) => {
     if (activeTab === "정보") {
       return <InformationSection mapReady={mapReady} />;
     }
+
+    if (activeTab === "상품") {
+      return <ItemSection />;
+    }
   };
 
   return (
     <Main>
-      {loading === "pending" && <StoreSkeleton />}
+      {(loading === "pending" || loading === "idle") && <StoreSkeleton />}
       {loading === "succeeded" && (
         <StoreContainer>
           <StoreBanner
             bgImage={storeData ? IMG_BASE_URL + storeData.backImg : ""}
           />
-
-          {/* --- ⬇️ JSX 구조 변경 ⬇️ --- */}
           <ProfileAndNavContainer>
             <ProfileInfo>
               <ProfileImage
@@ -185,8 +185,7 @@ const ViewStorePage = ({ mapReady }) => {
                 alt="가게 프로필 이미지"
               />
               <StoreInfo>
-                {/* <StoreName>{storeData.storeName}</StoreName> */}
-                <StoreName>{"가게"}</StoreName>
+                <StoreName>{storeData.storeName}</StoreName>
               </StoreInfo>
             </ProfileInfo>
             <TabNav>

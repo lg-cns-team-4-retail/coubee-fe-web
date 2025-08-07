@@ -11,14 +11,21 @@ export const loginUser = createAsyncThunk(
   async (loginData, { rejectWithValue }) => {
     try {
       const response = await apiClient.post("/user/auth/login", loginData);
-      const responseData = response.data.data;
 
+      const responseData = response.data.data;
+      console.log(responseData);
       if (typeof window !== "undefined" && responseData) {
-        localStorage.setItem("accessToken", responseData.access.token);
-        localStorage.setItem("refreshToken", responseData.refresh.token);
+        localStorage.setItem(
+          "accessToken",
+          responseData.accessRefreshToken.access.token
+        );
+        localStorage.setItem(
+          "refreshToken",
+          responseData.accessRefreshToken.refresh.token
+        );
       }
 
-      return responseData;
+      return responseData.userInfo;
     } catch (error) {
       console.error("로그인 실패 응답:", error.response.data);
       return rejectWithValue(error.response.data);
@@ -40,12 +47,27 @@ export const registerUser = createAsyncThunk(
   }
 );
 
+/* export const testApi = createAsyncThunk(
+  "user/auth/signup",
+  async ({ rejectWithValue }) => {
+    console.log("check");
+    try {
+      const response = await apiClient.get("/api/lecture");
+      return response;
+    } catch (error) {
+      console.error("회원가입 실패 응답:", error.response);
+      return rejectWithValue(error.response);
+    }
+  }
+); */
+
 const initialState = {
   isLoggedIn: false,
   userName: "",
   profileImage: "",
   status: "idle", // 'idle' | 'loading' | 'succeeded' | 'failed'
   error: null,
+  userInfo: null,
 };
 
 const userSlice = createSlice({
@@ -58,6 +80,7 @@ const userSlice = createSlice({
       state.profileImage = "";
       state.status = "idle";
       state.error = null;
+      state.userInfo = null;
       if (typeof window !== "undefined") {
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
@@ -71,12 +94,15 @@ const userSlice = createSlice({
         state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
+        console.log(action.payload);
         state.status = "succeeded";
         state.isLoggedIn = true;
+        state.userInfo = action.payload;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.status = "failed";
         state.isLoggedIn = false;
+        state.userInfo = null;
         state.error = action.payload;
       });
   },

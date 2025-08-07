@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { FaStore } from "react-icons/fa";
 
+const IMG_BASE_URL = import.meta.env.VITE_IMG_URL;
+
 const Wrapper = styled.div`
   width: 100%;
   padding: 1rem;
@@ -191,6 +193,7 @@ const BizImagePreview = styled.img`
 `;
 
 const PreviewComponent = ({ data }) => {
+  console.log(data);
   const [activeTab, setActiveTab] = useState("store");
 
   const renderContent = () => {
@@ -231,7 +234,7 @@ const PreviewComponent = ({ data }) => {
                 <BizImagePreview
                   src={
                     typeof data.bizImg === "string"
-                      ? data.bizImg
+                      ? IMG_BASE_URL + data.bizImg
                       : URL.createObjectURL(data.bizImg)
                   }
                   alt="사업자 등록증"
@@ -268,16 +271,16 @@ const PreviewComponent = ({ data }) => {
     <Wrapper>
       <PreviewContainer>
         <ProfileHeader>
-          <BackgroundImage src={data.backgroundImage} />
+          <BackgroundImage src={IMG_BASE_URL + data.backImg} />
         </ProfileHeader>
         <ProfileInfo>
           <ProfilePictureContainer>
-            {data.profileImage ? (
+            {data.profileImg ? (
               <ProfilePicture
                 src={
-                  typeof data.profileImage === "string"
-                    ? data.profileImage
-                    : URL.createObjectURL(data.profileImage)
+                  typeof data.profileImg === "string"
+                    ? IMG_BASE_URL + data.profileImg
+                    : URL.createObjectURL(data.profileImg)
                 }
                 alt="Profile"
               />

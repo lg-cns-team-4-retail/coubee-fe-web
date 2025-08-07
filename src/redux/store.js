@@ -6,6 +6,7 @@ import userReducer from "./slices/userSlice";
 import storeReducer from "./slices/storeSlice";
 import myStoreReducer from "./slices/myStoreSlice";
 import viewStoreReducer from "./slices/viewStoreSlice";
+import productReducer from "./slices/productSlice";
 
 const persistConfig = {
   key: "root",
@@ -19,6 +20,7 @@ const rootReducer = combineReducers({
   store: storeReducer,
   myStore: myStoreReducer,
   viewStore: viewStoreReducer,
+  product: productReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

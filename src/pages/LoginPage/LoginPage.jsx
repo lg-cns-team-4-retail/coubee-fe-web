@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useNavigate, Link } from "react-router-dom";
 import loginImg from "../../assets/coubeeLogin.svg";
 import { useDispatch } from "react-redux";
 import { loginUser } from "../../redux/slices/userSlice";
 import NotificationModal from "../../components/NotificationModal"; // 알림 모달 컴포넌트
-
 const LoginContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -164,7 +163,7 @@ export default function LoginPage() {
         title: "로그인 실패",
         message: err.message || "알 수 없는 오류가 발생했습니다.",
         onSuccess: () => setModalState({ ...modalState, isOpen: false }),
-        modalType: "fail", // 실패 시 'fail' 타입으로 설정
+        modalType: "fail",
       });
     } finally {
       setIsLoading(false);

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import styled, { keyframes } from "styled-components";
 import { MdOutlineCancel } from "react-icons/md";
 import { FaCheck } from "react-icons/fa";
+import { FaExclamationTriangle } from "react-icons/fa";
 
 // --- 스타일 컴포넌트 정의 (애니메이션 제거) ---
 const ModalBackdrop = styled.div`
@@ -79,6 +80,13 @@ const ModalIcon = ({ type }) => {
     return (
       <IconWrapper>
         <MdOutlineCancel size={56} color="#EF4444" />
+      </IconWrapper>
+    );
+  }
+  if (type === "info") {
+    return (
+      <IconWrapper>
+        <FaExclamationTriangle size={48} color="#8e6559" />
       </IconWrapper>
     );
   }

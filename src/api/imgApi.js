@@ -80,3 +80,30 @@ export const uploadCertificateImage = async (file) => {
     throw error;
   }
 };
+
+export const uploadProductImage = async (file) => {
+  console.log(file);
+
+  const formData = new FormData();
+
+  formData.append("file", file);
+  try {
+    const response = await apiClient.post(
+      "/product/admin/img/profile",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    console.log("Image upload success:", response.data);
+    const finalUrl = API_BASE_URL + "/store" + response.data.data;
+    console.log(finalUrl);
+    return response.data.data;
+  } catch (error) {
+    console.error("Image upload failed:", error);
+    throw error;
+  }
+};

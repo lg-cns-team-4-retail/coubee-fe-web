@@ -1,6 +1,7 @@
 import axios from "axios";
+import apiClient from ".";
 
-const KAKAO_API_KEY = import.meta.env.VITE_KAKAO_MAP_API_KEY;
+const KAKAO_API_KEY = import.meta.env.VITE_KAKAO_MAP_REST_API_KEY;
 
 export const getCoordinates = async (address) => {
   try {

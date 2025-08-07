@@ -2,6 +2,8 @@ import React from "react";
 import styled, { css } from "styled-components";
 import ImageUploader from "../../../components/ImageUploader";
 
+const IMG_BASE_URL = import.meta.env.VITE_IMG_URL;
+
 const StepContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -114,6 +116,7 @@ const FirstStep = ({
   errors,
   resetImage,
 }) => {
+  console.log(data);
   return (
     <StepContainer>
       <Section>
@@ -167,7 +170,10 @@ const FirstStep = ({
         </FormLabel>
         {data.backImg ? (
           <ImagePreviewContainer>
-            <ImagePreview src={data.backImg} alt="가게 배경 미리보기" />
+            <ImagePreview
+              src={IMG_BASE_URL + data.backImg}
+              alt="가게 배경 미리보기"
+            />
           </ImagePreviewContainer>
         ) : (
           <ImageUploader
@@ -190,7 +196,7 @@ const FirstStep = ({
         {data.profileImg ? (
           <ImagePreviewContainer>
             <ProfileImagePreview
-              src={data.profileImg}
+              src={IMG_BASE_URL + data.profileImg}
               alt="가게 프로필 미리보기"
             />
           </ImagePreviewContainer>

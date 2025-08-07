@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import Text from "../../../components/common/Text";
 import { useNavigate } from "react-router-dom";
 import { FaStore } from "react-icons/fa";
-
+import NotificationModal from "../../../components/NotificationModal"; // 모달 컴포넌트 임포트 확인
 const IMG_BASE_URL = import.meta.env.VITE_IMG_URL;
 
 const StoreCardContainer = styled.div`
@@ -13,7 +13,6 @@ const StoreCardContainer = styled.div`
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-
   display: flex;
   flex-direction: column;
 
@@ -46,7 +45,11 @@ const StatusChip = styled.div`
   font-weight: 600;
   color: #fff;
   background-color: ${({ status, theme }) =>
-    status === "APPROVED" ? theme.success : theme.primary};
+    status === "APPROVED"
+      ? theme.success
+      : status === "REJECTED"
+      ? theme.error
+      : theme.primary};
   z-index: 1;
   text-transform: capitalize;
 `;
@@ -102,7 +105,6 @@ const StoreDescription = styled(Text)`
   flex-grow: 1;
   min-height: 2.4em;
   margin: 0.5rem 0;
-
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
@@ -111,54 +113,102 @@ const StoreDescription = styled(Text)`
   word-wrap: break-word;
   color: grey;
 `;
+
 const StoreCard = ({ data }) => {
   const navigate = useNavigate();
   const {
     storeName,
     storeAddress,
-    cardImage,
     status,
     description,
     storeId,
     backImg,
     profileImg,
+    rejectReason,
   } = data;
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleCardClick = () => {
+    if (status === "APPROVED") {
+      navigate(`/view-store/${storeId}`);
+    } else {
+      setIsModalOpen(true);
+    }
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const getModalContent = () => {
+    if (status === "PENDING") {
+      return {
+        title: "심사 중인 매장",
+        message: "현재 관리자의 승인을 기다리고 있는 매장입니다.",
+        modalType: "info",
+      };
+    }
+    if (status === "REJECTED") {
+      return {
+        title: "승인 거절된 매장",
+        message: rejectReason || "거절 사유가 등록되지 않았습니다.",
+        modalType: "fail",
+      };
+    }
+    return {};
+  };
+
+  const modalContent = getModalContent();
 
   return (
-    <StoreCardContainer
-      onClick={() => {
-        navigate(`/view-store/${storeId}`);
-      }}
-    >
-      <CardImageContainer backgroundImage={IMG_BASE_URL + backImg}>
-        <StatusChip status={status}>{data.status}</StatusChip>
+    <>
+      <StoreCardContainer onClick={handleCardClick}>
+        <CardImageContainer backgroundImage={IMG_BASE_URL + backImg}>
+          <StatusChip status={status}>
+            {status === "PENDING"
+              ? "심사 중"
+              : status === "APPROVED"
+              ? "승인됨"
+              : "거절됨"}
+          </StatusChip>
 
-        {profileImg ? (
-          <StoreLogo
-            profileImg={profileImg}
-            src={IMG_BASE_URL + profileImg}
-            alt={`${storeName} logo`}
-          />
-        ) : (
-          <DefaultProfilePicture>
-            <FaStore />
-          </DefaultProfilePicture>
-        )}
-      </CardImageContainer>
-      <CardContent>
-        <Text variant="h3" weight="bold">
-          {storeName}
-        </Text>
-        {/* --- 변경점 4: 기존 Text 컴포넌트를 새로 만든 StoreDescription으로 교체 --- */}
-        <StoreDescription variant="p" color="gray">
-          {"최소 높이를 지정하여 내용이 없을 때도 공간을 차지 (line-height * 줄 수) 최소 높이를 지정하여 내용이 없을 때도 공간을 차지 (line-height * 줄 수)" ||
-            ""}
-        </StoreDescription>
-        <Text variant="p" color="gray">
-          {storeAddress}
-        </Text>
-      </CardContent>
-    </StoreCardContainer>
+          {profileImg ? (
+            <StoreLogo
+              profileImg={profileImg}
+              src={IMG_BASE_URL + profileImg}
+              alt={`${storeName} logo`}
+            />
+          ) : (
+            <DefaultProfilePicture>
+              <FaStore />
+            </DefaultProfilePicture>
+          )}
+        </CardImageContainer>
+        <CardContent>
+          <Text variant="h3" weight="bold">
+            {storeName}
+          </Text>
+          <StoreDescription variant="p" color="gray">
+            {description}
+          </StoreDescription>
+          <Text variant="p" color="gray">
+            {storeAddress}
+          </Text>
+        </CardContent>
+      </StoreCardContainer>
+
+      {isModalOpen && (
+        <NotificationModal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          title={modalContent.title}
+          message={modalContent.message}
+          onSuccess={closeModal}
+          buttonText="확인"
+          modalType={modalContent.modalType}
+        />
+      )}
+    </>
   );
 };
 
