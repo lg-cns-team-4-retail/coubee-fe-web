@@ -1,16 +1,13 @@
-import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React from "react";
 import styled from "styled-components";
 import ProgressBar from "./components/ProgressBar";
 import FirstStep from "./components/FirstStep";
 import SecondStep from "./components/SecondStep";
 import ThirdStep from "./components/ThirdStep";
 import PreviewComponent from "./components/PreviewComponent";
-import { registerStore } from "../../redux/slices/storeSlice";
 import Button from "../../components/common/Button";
 import SuccessComponent from "./components/SuccessComponent";
-import { resetRegisterStatus } from "../../redux/slices/storeSlice";
-import { useNavigate } from "react-router-dom";
+import useCreateStoreForm from "../../hooks/useCreateStoreForm";
 
 const MainContainer = styled.div`
   display: flex;
@@ -50,77 +47,23 @@ const ActionsContainer = styled.div`
 `;
 
 const CreateStorePage = () => {
-  const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState({
-    storeName: "",
-    description: "",
-    storeTag: "",
-    backImg: null,
-    profileImg: null,
-    bizOwnerName: "",
-    bizNo: "",
-    bizImg: null,
-    contactNo: "",
-    workingHour: "",
-    storeAddress: "",
-    latitude: "",
-    longitude: "",
-  });
-  const [errors, setErrors] = useState({});
-
-  const dispatch = useDispatch();
-  const { success } = useSelector((state) => state.store);
-  const handleChange = (e) => {
-    const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
-    if (errors[id]) {
-      setErrors((prev) => ({ ...prev, [id]: null }));
-    }
-  };
-
-  const resetImage = (type) => {
-    setFormData((prev) => ({ ...prev, [type]: null }));
-  };
-
-  const handleImageUpload = (file) => {
-    setFormData((prev) => ({ ...prev, backImg: file }));
-  };
-
-  const handleProfileImageUpload = (file) => {
-    setFormData((prev) => ({ ...prev, profileImg: file }));
-  };
-
-  const handleBizImageUpload = (file) => {
-    setFormData((prev) => ({ ...prev, bizImg: file }));
-  };
-
-  const handleAddressSelect = (address) => {
-    setFormData((prev) => ({ ...prev, ...address }));
-  };
-
-  const handleStepClick = (step) => {
-    if (step === currentStep) return;
-
-    if (step < currentStep) {
-      setErrors({});
-      setCurrentStep(step);
-      return;
-    }
-
-    // 앞으로 가는 경우, 현재 단계부터 목표 단계까지 순차적으로 유효성 검사
-    for (let i = 1; i < step; i++) {
-      if (!validateStep(i)) {
-        // 유효성 검사에 실패한 첫 번째 단계로 이동
-        setCurrentStep(i);
-        return;
-      }
-    }
-
-    // 모든 중간 단계가 유효하면 목표 단계로 이동
-    setErrors({});
-    setCurrentStep(step);
-  };
+  const {
+    currentStep,
+    formData,
+    errors,
+    success,
+    handleChange,
+    resetImage,
+    handleImageUpload,
+    handleProfileImageUpload,
+    handleBizImageUpload,
+    handleAddressSelect,
+    handleStepClick,
+    handleNext,
+    handlePrev,
+    handleSubmit,
+    handleFinish,
+  } = useCreateStoreForm();
 
   const steps = [
     { title: "가게 정보" },
@@ -131,60 +74,6 @@ const CreateStorePage = () => {
 
   const totalSteps = steps.length;
 
-  const validateStep = (step) => {
-    const newErrors = {};
-    switch (step) {
-      case 1:
-        if (!formData.storeName.trim())
-          newErrors.storeName = "가게 이름을 입력해주세요.";
-        if (!formData.description.trim())
-          newErrors.description = "가게 설명을 입력해주세요.";
-        break;
-      case 2:
-        if (!formData.bizOwnerName.trim())
-          newErrors.bizOwnerName = "사업자 이름을 입력해주세요.";
-        if (!formData.bizNo.trim())
-          newErrors.bizNo = "사업자 등록번호를 입력해주세요.";
-        if (!formData.bizImg)
-          newErrors.bizImg = "사업자 등록증을 첨부해주세요.";
-        break;
-      case 3:
-        if (!formData.contactNo.trim())
-          newErrors.contactNo = "연락처를 입력해주세요.";
-        if (!formData.workingHour.trim())
-          newErrors.workingHour = "영업 시간을 입력해주세요.";
-        if (!formData.storeAddress.trim())
-          newErrors.storeAddress = "가게 주소를 입력해주세요.";
-        break;
-      default:
-        break;
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleNext = () => {
-    if (validateStep(currentStep)) {
-      setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
-    }
-  };
-
-  const handlePrev = () => {
-    setCurrentStep((prev) => Math.max(prev - 1, 1));
-  };
-
-  const handleSubmit = (e) => {
-    console.log(formData, "check store");
-    e.preventDefault();
-    if (validateStep(1) && validateStep(2) && validateStep(3)) {
-      dispatch(registerStore(formData));
-    }
-  };
-  const handleFinish = () => {
-    dispatch(resetRegisterStatus());
-
-    navigate("/my-store");
-  };
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
