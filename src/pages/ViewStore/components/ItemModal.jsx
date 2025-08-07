@@ -1,8 +1,6 @@
-import React, { useState } from "react";
-import styled, { createGlobalStyle, css } from "styled-components";
+import React, { useRef } from "react";
+import styled, { createGlobalStyle } from "styled-components";
 import { FaTimes } from "react-icons/fa";
-import { useSelector, useDispatch } from "react-redux";
-import ImageUploader from "../../../components/ImageUploader";
 import ItemForm from "./ItemForm";
 
 const LockScroll = createGlobalStyle`
@@ -17,11 +15,11 @@ const ModalBackdrop = styled.div`
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.6); // 뒷 배경을 어둡게 처리
+  background-color: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000; // 다른 요소들 위에 표시
+  z-index: 1000;
 `;
 
 const ModalContainer = styled.div`
@@ -29,7 +27,6 @@ const ModalContainer = styled.div`
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
-
   width: 90vw;
   max-width: 700px;
   max-height: 85vh;
@@ -41,7 +38,7 @@ const ModalContainer = styled.div`
     height: 100%;
     max-width: 100%;
     max-height: 100%;
-    border-radius: 0; // 모바일에서는 꽉 채우므로 radius 제거
+    border-radius: 0;
   }
 `;
 
@@ -51,7 +48,7 @@ const ModalHeader = styled.header`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-shrink: 0; // 높이가 줄어들지 않도록
+  flex-shrink: 0;
 `;
 
 const ModalTitle = styled.h2`
@@ -60,6 +57,7 @@ const ModalTitle = styled.h2`
   color: ${({ theme }) => theme.text || "#333"};
   margin: 0;
 `;
+
 const CloseButton = styled.button`
   background: none;
   border: none;
@@ -75,8 +73,8 @@ const CloseButton = styled.button`
 `;
 
 const ModalBody = styled.div`
-  flex: 1; // 남는 공간을 모두 차지하도록 설정
-  overflow-y: auto; // 내용이 많아지면 자동으로 스크롤바 생성
+  flex: 1;
+  overflow-y: auto;
   padding: 1.5rem;
 `;
 
@@ -86,7 +84,7 @@ const ModalFooter = styled.footer`
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
-  flex-shrink: 0; // 높이가 줄어들지 않도록
+  flex-shrink: 0;
 `;
 
 const StyledButton = styled.button`
@@ -97,7 +95,6 @@ const StyledButton = styled.button`
   cursor: pointer;
   border: 1px solid transparent;
 
-  // isPrimary prop에 따라 스타일 변경
   background-color: ${({ isPrimary, theme }) =>
     isPrimary ? theme.primary : theme.bg_element2};
   color: ${({ isPrimary, theme }) => (isPrimary ? "white" : theme.text)};
@@ -109,13 +106,26 @@ const StyledButton = styled.button`
   }
 `;
 
-const ItemModal = ({ itemData, isOpen, onClose }) => {
+const ItemModal = ({ itemData, isOpen, onClose, onSubmit }) => {
+  const formRef = useRef();
+
   if (!isOpen) return null;
+
+  const handleFormSubmit = (formData) => {
+    onSubmit(formData);
+    onClose();
+  };
+
+  const triggerSubmit = () => {
+    formRef.current.dispatchEvent(
+      new Event("submit", { cancelable: true, bubbles: true })
+    );
+  };
 
   return (
     <>
       <LockScroll />
-      <ModalBackdrop>
+      <ModalBackdrop onClick={onClose}>
         <ModalContainer onClick={(e) => e.stopPropagation()}>
           <ModalHeader>
             <ModalTitle>
@@ -126,11 +136,15 @@ const ItemModal = ({ itemData, isOpen, onClose }) => {
             </CloseButton>
           </ModalHeader>
           <ModalBody>
-            <ItemForm />
+            <ItemForm
+              ref={formRef}
+              initialData={itemData}
+              onSubmit={handleFormSubmit}
+            />
           </ModalBody>
           <ModalFooter>
             <StyledButton onClick={onClose}>취소</StyledButton>
-            <StyledButton isPrimary onClick={onClose}>
+            <StyledButton isPrimary onClick={triggerSubmit}>
               {itemData ? "수정하기" : "등록하기"}
             </StyledButton>
           </ModalFooter>
