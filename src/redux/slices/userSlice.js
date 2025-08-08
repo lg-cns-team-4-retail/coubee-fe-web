@@ -47,20 +47,6 @@ export const registerUser = createAsyncThunk(
   }
 );
 
-/* export const testApi = createAsyncThunk(
-  "user/auth/signup",
-  async ({ rejectWithValue }) => {
-    console.log("check");
-    try {
-      const response = await apiClient.get("/api/lecture");
-      return response;
-    } catch (error) {
-      console.error("회원가입 실패 응답:", error.response);
-      return rejectWithValue(error.response);
-    }
-  }
-); */
-
 const initialState = {
   isLoggedIn: false,
   userName: "",
@@ -76,10 +62,6 @@ const userSlice = createSlice({
   reducers: {
     logoutUser: (state) => {
       state.isLoggedIn = false;
-      state.userName = "";
-      state.profileImage = "";
-      state.status = "idle";
-      state.error = null;
       state.userInfo = null;
       if (typeof window !== "undefined") {
         localStorage.removeItem("accessToken");

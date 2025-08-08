@@ -1,8 +1,14 @@
-import React, { useRef } from "react";
-import styled, { createGlobalStyle } from "styled-components";
+import React, { useState } from "react";
+import styled, { createGlobalStyle, css } from "styled-components";
 import { FaTimes } from "react-icons/fa";
+import { useSelector, useDispatch } from "react-redux";
+import ImageUploader from "../../../components/ImageUploader";
 import ItemForm from "./ItemForm";
-
+import {
+  createProduct,
+  updateProduct,
+} from "../../../redux/slices/productSlice";
+import NotificationModal from "../../../components/NotificationModal";
 const LockScroll = createGlobalStyle`
   body {
     overflow: hidden;
@@ -15,11 +21,11 @@ const ModalBackdrop = styled.div`
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0.6); // 뒷 배경을 어둡게 처리
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 1000; // 다른 요소들 위에 표시
 `;
 
 const ModalContainer = styled.div`
@@ -27,6 +33,7 @@ const ModalContainer = styled.div`
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
+
   width: 90vw;
   max-width: 700px;
   max-height: 85vh;
@@ -38,7 +45,7 @@ const ModalContainer = styled.div`
     height: 100%;
     max-width: 100%;
     max-height: 100%;
-    border-radius: 0;
+    border-radius: 0; // 모바일에서는 꽉 채우므로 radius 제거
   }
 `;
 
@@ -57,7 +64,6 @@ const ModalTitle = styled.h2`
   color: ${({ theme }) => theme.text || "#333"};
   margin: 0;
 `;
-
 const CloseButton = styled.button`
   background: none;
   border: none;
@@ -73,8 +79,8 @@ const CloseButton = styled.button`
 `;
 
 const ModalBody = styled.div`
-  flex: 1;
-  overflow-y: auto;
+  flex: 1; // 남는 공간을 모두 차지하도록 설정
+  overflow-y: auto; // 내용이 많아지면 자동으로 스크롤바 생성
   padding: 1.5rem;
 `;
 
@@ -84,7 +90,7 @@ const ModalFooter = styled.footer`
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
-  flex-shrink: 0;
+  flex-shrink: 0; // 높이가 줄어들지 않도록
 `;
 
 const StyledButton = styled.button`
@@ -95,6 +101,7 @@ const StyledButton = styled.button`
   cursor: pointer;
   border: 1px solid transparent;
 
+  // isPrimary prop에 따라 스타일 변경
   background-color: ${({ isPrimary, theme }) =>
     isPrimary ? theme.primary : theme.bg_element2};
   color: ${({ isPrimary, theme }) => (isPrimary ? "white" : theme.text)};
@@ -106,30 +113,63 @@ const StyledButton = styled.button`
   }
 `;
 
-const ItemModal = ({ itemData, isOpen, onClose, onSubmit }) => {
-  const formRef = useRef();
+const ItemModal = ({
+  itemData,
+  isOpen,
+  onClose,
+  onFormChange,
+  onImageUpload,
+  resetImage,
+}) => {
+  const dispatch = useDispatch();
+  const isEditMode = Boolean(itemData && itemData.productId);
+
+  const [notification, setNotification] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    modalType: "info",
+  });
+
+  const submitItem = async () => {
+    const actionToDispatch = isEditMode
+      ? updateProduct(itemData)
+      : createProduct(itemData);
+
+    try {
+      const result = await dispatch(actionToDispatch).unwrap();
+
+      setNotification({
+        isOpen: true,
+        title: isEditMode ? "수정 완료" : "등록 완료",
+        message: "작업이 성공적으로 처리되었습니다.",
+        modalType: "success",
+      });
+    } catch (error) {
+      console.error("작업 실패:", error);
+      setNotification({
+        isOpen: true,
+        title: "오류 발생",
+        message: error.message || "작업 중 오류가 발생했습니다.",
+        modalType: "fail",
+      });
+    }
+  };
+
+  const closeNotification = () => {
+    setNotification({ ...notification, isOpen: false });
+  };
 
   if (!isOpen) return null;
-
-  const handleFormSubmit = (formData) => {
-    onSubmit(formData);
-    onClose();
-  };
-
-  const triggerSubmit = () => {
-    formRef.current.dispatchEvent(
-      new Event("submit", { cancelable: true, bubbles: true })
-    );
-  };
 
   return (
     <>
       <LockScroll />
-      <ModalBackdrop onClick={onClose}>
+      <ModalBackdrop>
         <ModalContainer onClick={(e) => e.stopPropagation()}>
           <ModalHeader>
             <ModalTitle>
-              {itemData ? "물품 수정하기" : "물품 등록하기"}
+              {isEditMode ? "물품 수정하기" : "물품 등록하기"}
             </ModalTitle>
             <CloseButton onClick={onClose}>
               <FaTimes />
@@ -137,19 +177,31 @@ const ItemModal = ({ itemData, isOpen, onClose, onSubmit }) => {
           </ModalHeader>
           <ModalBody>
             <ItemForm
-              ref={formRef}
-              initialData={itemData}
-              onSubmit={handleFormSubmit}
+              data={itemData}
+              onFormChange={onFormChange}
+              onImageUpload={onImageUpload}
+              resetImage={resetImage}
             />
           </ModalBody>
           <ModalFooter>
             <StyledButton onClick={onClose}>취소</StyledButton>
-            <StyledButton isPrimary onClick={triggerSubmit}>
-              {itemData ? "수정하기" : "등록하기"}
+            <StyledButton isPrimary onClick={submitItem}>
+              {isEditMode ? "수정하기" : "등록하기"}
             </StyledButton>
           </ModalFooter>
         </ModalContainer>
       </ModalBackdrop>
+
+      <NotificationModal
+        isOpen={notification.isOpen}
+        onClose={closeNotification}
+        title={notification.title}
+        message={notification.message}
+        modalType={notification.modalType}
+        onSuccess={
+          notification.modalType === "success" ? onClose : closeNotification
+        }
+      />
     </>
   );
 };

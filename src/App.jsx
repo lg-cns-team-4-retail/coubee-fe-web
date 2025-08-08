@@ -9,8 +9,6 @@ import RegistrationPage from "./pages/RegistrationPage/RegistrationPage";
 import MyStorePage from "./pages/MyStorePage/MyStorePage";
 import CreateStorePage from "./pages/CreateStorePage/CreateStorePage";
 import ViewStorePage from "./pages/ViewStore/ViewStorePage";
-import ComponentPreview from "./pages/ComponentPreview";
-
 function App() {
   const [theme, setTheme] = useState("light");
   const currentTheme = theme === "light" ? lightTheme : darkTheme;
@@ -30,7 +28,6 @@ function App() {
           <Route path="/my-store" element={<MyStorePage />} />
           <Route path="/create-store" element={<CreateStorePage />} />
           <Route path="/view-store/:id" element={<ViewStorePage />} />
-          <Route path="/component" element={<ComponentPreview />} />
         </Routes>
       </main>
     </ThemeProvider>

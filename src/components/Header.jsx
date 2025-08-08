@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import coubee from "../assets/coubee.svg";
 import { FaSun, FaMoon, FaBars, FaTimes, FaSignOutAlt } from "react-icons/fa";
+import { useSelector, useDispatch } from "react-redux";
+import { logoutUser } from "../redux/slices/userSlice";
 
 const HeaderContainer = styled.header`
   background-color: #8e6559;
@@ -145,29 +147,33 @@ const MobileNav = styled.div`
 
 function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
+  const { isLoggedIn } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
   const LoggedOutMenu = () => (
     <NavContainer>
       <NavButton to="/login">로그인</NavButton>
       <SecondButton to="/registration">회원가입</SecondButton>
-      {/*       <NonNavButton onClick={handleToggleTheme}>
-        {themeMode === "light" ? <FaMoon /> : <FaSun />}
-      </NonNavButton> */}
     </NavContainer>
   );
 
+  const handleLogout = () => {
+    console.log("check");
+    dispatch(logoutUser());
+    setIsMobileMenuOpen(false);
+    setTimeout(() => {
+      navigate("/login");
+    }, 1500);
+  };
+
   const LoggedInMenu = () => (
     <NavContainer>
-      <SecondButton to="/ask">질문하기</SecondButton>
+      <NavButton to="/ask">나의 매장</NavButton>
 
-      <NonNavButton onClick={handleLogout}>
+      <SecondButton onClick={handleLogout}>
         <FaSignOutAlt /> 로그아웃
-      </NonNavButton>
-      {/*       <NonNavButton onClick={handleToggleTheme}>
-        {themeMode === "light" ? <FaMoon /> : <FaSun />}
-      </NonNavButton> */}
+      </SecondButton>
     </NavContainer>
   );
 
@@ -199,16 +205,9 @@ function Header() {
         </MobileMenuButton>
         {isLoggedIn ? (
           <>
-            <SecondButton to="/ask">
-              <FaFeatherAlt /> 질문하기
-            </SecondButton>
-
-            <NonNavButton>
+            <NavButton onClick={handleLogout}>
               <FaSignOutAlt /> 로그아웃
-            </NonNavButton>
-            <NonNavButton onClick={handleToggleTheme}>
-              {themeMode === "light" ? <FaMoon /> : <FaSun />}
-            </NonNavButton>
+            </NavButton>
           </>
         ) : (
           <>

@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import apiClient from "../../api";
 
+// (기존) 상품 목록을 가져오는 비동기 작업
 export const fetchProducts = createAsyncThunk(
   "products/fetchProducts",
   async ({ page, size, sort, storeId }, { rejectWithValue }) => {
@@ -8,6 +9,36 @@ export const fetchProducts = createAsyncThunk(
       const response = await apiClient.get(`/product/admin/list/${storeId}`, {
         params: { page, size, sort },
       });
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const createProduct = createAsyncThunk(
+  "products/createProduct",
+  async (productData, { rejectWithValue }) => {
+    try {
+      const response = await apiClient.post(
+        "/product/admin/register",
+        productData
+      );
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const updateProduct = createAsyncThunk(
+  "products/updateProduct",
+  async (productData, { rejectWithValue }) => {
+    try {
+      const response = await apiClient.post(
+        "/product/admin/update",
+        productData
+      );
       return response.data.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -43,6 +74,21 @@ const productSlice = createSlice({
       .addCase(fetchProducts.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload;
+      })
+
+      .addCase(createProduct.fulfilled, (state, action) => {
+        state.products.unshift(action.payload);
+        state.totalElements += 1;
+      })
+      .addCase(updateProduct.fulfilled, (state, action) => {
+        const updatedProduct = action.payload;
+        const index = state.products.findIndex(
+          (product) => product.productId === updatedProduct.productId
+        );
+
+        if (index !== -1) {
+          state.products[index] = updatedProduct;
+        }
       });
   },
 });

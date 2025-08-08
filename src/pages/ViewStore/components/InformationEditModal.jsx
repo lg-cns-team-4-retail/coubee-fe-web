@@ -303,7 +303,20 @@ const InformationEditModal = ({ isOpen, onClose }) => {
                 <ErrorMessage>{errors.storeTag}</ErrorMessage>
               )}
             </LabelContainer>
-
+            <LabelContainer>
+              <FormLabel required htmlFor="workingHour">
+                영업 시간
+              </FormLabel>
+              <FormTextArea
+                id="workingHour"
+                placeholder="예: 평일 09:00 ~ 18:00"
+                value={data.workingHour}
+                onChange={handleChange}
+              />
+              {errors.workingHour && (
+                <ErrorMessage>{errors.workingHour}</ErrorMessage>
+              )}
+            </LabelContainer>
             {/**가게 배경이미지 Section */}
             <LabelContainer>
               <FormLabel>
@@ -324,25 +337,12 @@ const InformationEditModal = ({ isOpen, onClose }) => {
               ) : (
                 <ImageUploader
                   type={"background"}
-                  aspectRatio={16 / 6}
+                  aspectRatio={8 / 1}
                   onUploadComplete={handleBackgroundImageUpload}
                 />
               )}
             </LabelContainer>
-            <LabelContainer>
-              <FormLabel required htmlFor="workingHour">
-                영업 시간
-              </FormLabel>
-              <FormTextArea
-                id="workingHour"
-                placeholder="예: 평일 09:00 ~ 18:00"
-                value={data.workingHour}
-                onChange={handleChange}
-              />
-              {errors.workingHour && (
-                <ErrorMessage>{errors.workingHour}</ErrorMessage>
-              )}
-            </LabelContainer>
+
             {/**가게 태그 Section */}
 
             <LabelContainer>

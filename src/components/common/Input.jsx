@@ -11,7 +11,7 @@ const InputWrapper = styled.div`
 const StyledLabel = styled.label`
   font-weight: ${({ theme }) => theme.font.weight.semibold};
   font-size: 0.9rem;
-  color: ${({ theme }) => theme.text_secondary};
+  color: ${({ theme }) => theme.primary};
   display: block;
   margin-bottom: 0.5rem;
 `;

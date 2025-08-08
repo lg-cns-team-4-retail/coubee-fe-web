@@ -11,15 +11,18 @@ const skeletonLoading = keyframes`
 `;
 
 const SkeletonContainer = styled.div`
-  max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
-  background-color: white;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  border-bottom-left-radius: 0.5rem;
-  border-bottom-right-radius: 0.5rem;
+  background-color: #f2f3f7;
+
+  display: flex;
+  flex-direction: column;
+  flex: 1;
   overflow: hidden;
-  min-height: calc(100vh - 64px);
+
+  @media (min-width: 1300px) {
+    max-width: 1200px;
+  }
 `;
 
 const SkeletonBanner = styled.div`

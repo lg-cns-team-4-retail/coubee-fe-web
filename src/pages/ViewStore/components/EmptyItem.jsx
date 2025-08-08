@@ -1,8 +1,20 @@
 import React from "react";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import Text from "../../../components/common/Text";
 import Button from "../../../components/common/Button";
 import coubeeLogo from "../../../assets/coubeeLogin.svg";
+
+const floatAnimation = keyframes`
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px); /* 이미지가 위로 8px만큼 떠오릅니다. */
+  }
+  100% {
+    transform: translateY(0px);
+  }
+`;
 
 const Container = styled.div`
   display: flex;
@@ -21,7 +33,11 @@ const Container = styled.div`
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     img {
       transition: transform 0.4s ease-in-out;
-      transform: scaleX(-1);
+      /* transform: scaleX(-1); */
+      animation: ${floatAnimation} 2s ease-in-out infinite;
+    }
+    button {
+      transform: scale(1.1);
     }
   }
 `;

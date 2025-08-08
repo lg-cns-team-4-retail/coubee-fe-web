@@ -13,58 +13,54 @@ import ItemSection from "./components/ItemSection";
 import useKakaoLoader from "../../components/useKakaoLoader";
 const IMG_BASE_URL = import.meta.env.VITE_IMG_URL;
 
-const Main = styled.main`
+const Main = styled.div`
   max-width: 100%;
   margin: 0 auto;
-`;
-
-const StoreContainer = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
-  background-color: #f2f3f7;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  border-bottom-left-radius: 0.5rem;
-  border-bottom-right-radius: 0.5rem;
   height: calc(100vh - 64px);
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 `;
 
-const StoreBanner = styled.div`
-  height: 12rem;
+const StoreContainer = styled.div`
   width: 100%;
-  background-size: cover;
-  background-position: center;
-  background-image: url(${(props) => props.bgImage});
+  margin: 0 auto;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+
+  @media (min-width: 1300px) {
+    max-width: 1200px;
+  }
+`;
+
+const StoreBanner = styled.img`
+  height: 11.25em;
+  width: 100%;
+  object-fit: cover; /* 이미지가 잘리지 않고 채워지도록 수정 */
   flex-shrink: 0;
-  @media (min-width: 768px) {
-    height: 16rem;
+  @media (max-width: 768px) {
+    height: 5.625em;
   }
 `;
 
 const ProfileAndNavContainer = styled.div`
-  padding: 1rem;
-  position: relative;
-  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 1rem;
   flex-shrink: 0;
-  @media (min-width: 640px) {
-    padding: 1.5rem;
-  }
+  width: 100%;
+  z-index: 1;
 `;
 
 const ContentWrapper = styled.div`
   flex: 1;
   overflow: hidden;
-  padding: 0 1.5rem;
   display: flex;
   flex-direction: column;
-`;
-
-const ProfileInfo = styled.div`
-  display: flex;
-  align-items: flex-end;
-  margin-top: -3rem;
 `;
 
 const ProfileImage = styled.img`
@@ -75,15 +71,26 @@ const ProfileImage = styled.img`
   background-color: white;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
     0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  position: relative;
+
   @media (min-width: 640px) {
     width: 8rem;
     height: 8rem;
   }
 `;
+const ProfileImageContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: -4rem;
+  @media (min-width: 768px) {
+    margin-top: -3rem;
+  }
+`;
 
 const StoreInfo = styled.div`
-  margin-left: 1rem;
   padding-bottom: 0.5rem;
+  margin-top: 0.5rem;
 `;
 
 const StoreName = styled.h1`
@@ -98,10 +105,12 @@ const StoreName = styled.h1`
 const TabNav = styled.nav`
   margin-top: 0.5rem;
   border-bottom: 1px solid #e5e7eb;
+  width: 100%; /* 탭 하단 경계선이 전체 너비를 차지하도록 설정 */
 `;
 
 const TabNavContainer = styled.div`
   display: flex;
+  justify-content: center; /* 탭 버튼들 중앙 정렬 */
   gap: 1.5rem;
   @media (min-width: 640px) {
     gap: 2rem;
@@ -111,24 +120,26 @@ const TabNavContainer = styled.div`
 const StyledTabButton = styled.button`
   padding: 0.5rem 0.25rem;
   font-size: 1.125rem;
-  font-weight: 500;
+  font-weight: ${({ active }) => (active ? "700" : "500")};
   transition: color 0.3s;
   border: none;
   background: none;
   cursor: pointer;
   border-bottom: 2px solid transparent;
 
-  color: ${({ active }) => (active ? "#111827" : "#6b7280")};
-  border-color: ${({ active }) => (active ? "#1f2937" : "transparent")};
+  color: ${({ active, theme }) => (active ? theme.primary : "#6b7280")};
+  border-color: ${({ active, theme }) =>
+    active ? theme.primary : "transparent"};
 
   &:hover {
-    color: #1f2937;
+    color: ${({ theme }) => theme.secondary};
   }
 `;
 
 const TabContent = styled.div`
   overflow-y: auto;
   flex: 1;
+  padding: 0 1rem 1rem 1rem;
 `;
 
 const TABS = {
@@ -161,40 +172,46 @@ const ViewStorePage = () => {
   return (
     <Main>
       {(loading === "pending" || loading === "idle") && <StoreSkeleton />}
+
       {loading === "succeeded" && storeData && (
-        <StoreContainer>
-          <StoreBanner bgImage={`${IMG_BASE_URL}${storeData.backImg}`} />
-          <ProfileAndNavContainer>
-            <ProfileInfo>
-              <ProfileImage
-                src={`${IMG_BASE_URL}${storeData.profileImg}`}
-                alt="가게 프로필 이미지"
-              />
+        <>
+          <StoreBanner
+            src={`${IMG_BASE_URL}${storeData.backImg}`}
+            alt="가게 배너 이미지"
+          />
+          <ProfileImageContainer>
+            <ProfileImage
+              src={`${IMG_BASE_URL}${storeData.profileImg}`}
+              alt="가게 프로필 이미지"
+            />
+          </ProfileImageContainer>
+          <StoreContainer>
+            <ProfileAndNavContainer>
               <StoreInfo>
                 <StoreName>{storeData.storeName}</StoreName>
               </StoreInfo>
-            </ProfileInfo>
-            <TabNav>
-              <TabNavContainer>
-                {Object.keys(TABS).map((tab) => (
-                  <StyledTabButton
-                    key={tab}
-                    active={activeTab === tab}
-                    onClick={() => setActiveTab(tab)}
-                  >
-                    {tab}
-                  </StyledTabButton>
-                ))}
-              </TabNavContainer>
-            </TabNav>
-          </ProfileAndNavContainer>
+              <TabNav>
+                <TabNavContainer>
+                  {Object.keys(TABS).map((tab) => (
+                    <StyledTabButton
+                      key={tab}
+                      active={activeTab === tab}
+                      onClick={() => setActiveTab(tab)}
+                    >
+                      {tab}
+                    </StyledTabButton>
+                  ))}
+                </TabNavContainer>
+              </TabNav>
+            </ProfileAndNavContainer>
 
-          <ContentWrapper>
-            <TabContent>
-              <ActiveSection mapReady={!mapLoading} />
-            </TabContent>
-          </ContentWrapper>
-        </StoreContainer>
+            <ContentWrapper>
+              <TabContent>
+                <ActiveSection mapReady={!mapLoading} />
+              </TabContent>
+            </ContentWrapper>
+          </StoreContainer>
+        </>
       )}
 
       <NotificationModal

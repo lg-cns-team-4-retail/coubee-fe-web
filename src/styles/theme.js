@@ -10,7 +10,7 @@ export const lightTheme = {
   primary: "#8E6559", // 주색 (Warm Brown)
   secondary: "#D7B88D", // 부색 (Soft Gold)
   accent: "#E59866", // 강조색 (Soft Terracotta)
-  bg: "#FDFBF7", // 전체 배경색 (Off-White Cream)
+  bg: "#f2f3f7", // 전체 배경색 (Off-White Cream)
   bg_page: "#FFFFFF", // 페이지/카드 배경색 (Pure White)
   bg_component: "#F3EDE2", // 컴포넌트 배경색 (Light Beige)
   text: "#433431", // 주 텍스트 색상 (Dark Brown)
@@ -178,6 +178,32 @@ export const GlobalStyle = createGlobalStyle`
     &:hover {
       text-decoration: underline;
     }
+  }
+
+  * {
+    /* Firefox */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.5); 
+    }
+  }
+  *::-webkit-scrollbar-button {
+    display: none; 
   }
 `;
 

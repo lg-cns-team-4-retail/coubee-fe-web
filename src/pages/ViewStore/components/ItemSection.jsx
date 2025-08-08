@@ -46,9 +46,9 @@ const EditLinkButton = styled(Button)`
 
 const ItemContainer = styled.div`
   display: grid;
-  gap: 1.5rem;
+  gap: 1rem;
 
-  grid-template-columns: repeat(3, 1fr);
+  /*   grid-template-columns: repeat(3, 1fr);
 
   @media (max-width: 1024px) {
     grid-template-columns: repeat(2, 1fr);
@@ -56,6 +56,11 @@ const ItemContainer = styled.div`
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
+  }
+ */
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  @media (max-width: 768px) {
+    gap: 0.75rem;
   }
 `;
 
@@ -73,18 +78,20 @@ const ItemSection = () => {
       page,
       size: 10,
       sort: "productName,ASC",
-      storeId: 1,
+      storeId,
     };
     dispatch(fetchProducts(request));
   }, [page]);
 
-  // ✨ 2. '등록하기' 버튼 클릭 시 실행될 함수
   const handleOpenCreateModal = () => {
     setFormData({
       productName: "",
-      salePrice: 0,
-      stock: 0,
-      productImg: null, // 이미지 필드도 초기화
+      description: "",
+      originPrice: "",
+      salePrice: "",
+      stock: "",
+      productImg: null,
+      storeId,
     });
     setItemModalOpen(true);
   };
@@ -103,6 +110,10 @@ const ItemSection = () => {
 
   const handleImageUploadComplete = (imageUrl) => {
     setFormData((prev) => ({ ...prev, productImg: imageUrl }));
+  };
+
+  const resetImage = (type) => {
+    setFormData((prev) => ({ ...prev, [type]: null }));
   };
 
   const closeItemModal = () => {
@@ -136,13 +147,16 @@ const ItemSection = () => {
       </ItemContainer>
 
       {status === "succeeded" && products.length === 0 && (
-        <EmptyItems onButtonClick={handleAddItem} />
+        <EmptyItems onButtonClick={handleOpenCreateModal} />
       )}
 
       <ItemModal
         isOpen={itemModalOpen}
         onClose={closeItemModal}
         itemData={formData}
+        onFormChange={handleChange}
+        onImageUpload={handleImageUploadComplete}
+        resetImage={resetImage}
       />
     </ItemSectionContainer>
   );
