@@ -82,7 +82,6 @@ const ImagePreviewContainer = styled.div`
 
 const ImagePreview = styled.img`
   width: 100%;
-  max-height: 300px;
   object-fit: cover;
   border-radius: 8px;
 `;
@@ -128,7 +127,7 @@ const SecondStep = ({ data, onChange, onImageUpload, errors, resetImage }) => {
           />
           {errors.bizNo && <ErrorMessage>{errors.bizNo}</ErrorMessage>}
         </div>
-        <div>
+        <div style={{ marginTop: "1rem" }}>
           <FormLabel>
             사업자 등록증
             {data.bizImg && (

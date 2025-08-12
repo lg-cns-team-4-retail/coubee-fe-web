@@ -113,6 +113,21 @@ const StoreDescription = styled(Text)`
   word-wrap: break-word;
   color: grey;
 `;
+const TagContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+`;
+
+const Tag = styled.span`
+  background-color: ${({ theme }) => theme.primary};
+  color: white;
+  padding: 0.3rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+`;
 
 const StoreCard = ({ data }) => {
   const navigate = useNavigate();
@@ -125,6 +140,7 @@ const StoreCard = ({ data }) => {
     backImg,
     profileImg,
     rejectReason,
+    storeTag,
   } = data;
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -194,6 +210,13 @@ const StoreCard = ({ data }) => {
           <Text variant="p" color="gray">
             {storeAddress}
           </Text>
+          {storeTag.length > 0 && (
+            <TagContainer>
+              {storeTag.map((item) => (
+                <Tag key={item.categoryId}>#{item.name}</Tag>
+              ))}
+            </TagContainer>
+          )}
         </CardContent>
       </StoreCardContainer>
 

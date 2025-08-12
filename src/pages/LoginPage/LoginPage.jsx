@@ -155,7 +155,7 @@ export default function LoginPage() {
       const result = await dispatch(loginUser(formData)).unwrap();
 
       console.log("로그인 성공:", result);
-      navigate("/create-store");
+      navigate("/my-store");
     } catch (err) {
       console.error("로그인 실패:", err);
       setModalState({

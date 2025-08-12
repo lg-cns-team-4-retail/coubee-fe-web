@@ -56,7 +56,7 @@ const MyStorePage = () => {
     <PageContainer>
       <TitleContainer>
         <Text variant="h4" weight="bold">
-          {userInfo?.name || "사용자"}님의 매장 정보
+          {userInfo?.nickname || "사용자"}님의 매장 정보
         </Text>
 
         <Button onClick={handleCreateButtonClick}>매장 등록하기</Button>

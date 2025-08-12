@@ -48,7 +48,7 @@ const ItemContainer = styled.div`
   display: grid;
   gap: 1rem;
 
-  /*   grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, 1fr);
 
   @media (max-width: 1024px) {
     grid-template-columns: repeat(2, 1fr);
@@ -57,11 +57,11 @@ const ItemContainer = styled.div`
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
- */
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+
+  /*  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   @media (max-width: 768px) {
     gap: 0.75rem;
-  }
+  } */
 `;
 
 const ItemSection = () => {

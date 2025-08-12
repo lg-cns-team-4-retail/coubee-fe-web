@@ -6,7 +6,6 @@ import { useDispatch } from "react-redux";
 import easterImg from "../../assets/coubeeWelcome.svg";
 import NotificationModal from "../../components/NotificationModal";
 import { registerUser } from "../../redux/slices/userSlice";
-
 const WEB_ROLE = import.meta.env.VITE_APP_ROLE;
 
 const LoginContainer = styled.div`
@@ -181,7 +180,10 @@ export default function RegistrationPage() {
         isOpen: true,
         title: "회원가입 성공",
         message: "쿠비에 가입해주셔서 감사합니다!",
-        onSuccess: () => setModalState({ ...modalState, isOpen: false }),
+        onSuccess: () => {
+          setModalState({ ...modalState, isOpen: false });
+          navigate("/login");
+        },
         buttonText: "로그인 하러 가기",
         modalType: "success",
       });

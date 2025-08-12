@@ -191,7 +191,21 @@ const BizImagePreview = styled.img`
   border-radius: 8px;
   margin-top: 1rem;
 `;
+const TagContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+`;
 
+const Tag = styled.span`
+  background-color: ${({ theme }) => theme.primary};
+  color: white;
+  padding: 0.3rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+`;
 const PreviewComponent = ({ data }) => {
   console.log(data);
   const [activeTab, setActiveTab] = useState("store");
@@ -207,12 +221,18 @@ const PreviewComponent = ({ data }) => {
             </DetailSection>
             <DetailSection>
               <DetailTitle>가게 설명</DetailTitle>
-              <DetailText>{data.storeDesc}</DetailText>
+              <DetailText>{data.description}</DetailText>
             </DetailSection>
             <DetailSection>
               <DetailTitle>가게 태그</DetailTitle>
               <DetailText>
-                {data.storeTag || "입력된 태그가 없습니다."}
+                {data.storeTag.length > 0 && (
+                  <TagContainer>
+                    {data.storeTag.split(",").map((item, index) => (
+                      <Tag key={index}>#{item}</Tag>
+                    ))}
+                  </TagContainer>
+                )}
               </DetailText>
             </DetailSection>
           </div>
