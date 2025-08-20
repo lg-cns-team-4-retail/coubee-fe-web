@@ -329,10 +329,7 @@ const InformationEditModal = ({ isOpen, onClose }) => {
               </FormLabel>
               {data.backImg ? (
                 <ImagePreviewContainer>
-                  <ImagePreview
-                    src={IMG_BASE_URL + data.backImg}
-                    alt="가게 배경 미리보기"
-                  />
+                  <ImagePreview src={data.backImg} alt="가게 배경 미리보기" />
                 </ImagePreviewContainer>
               ) : (
                 <ImageUploader
@@ -357,7 +354,7 @@ const InformationEditModal = ({ isOpen, onClose }) => {
               {data.profileImg ? (
                 <ImagePreviewContainer>
                   <ProfileImagePreview
-                    src={IMG_BASE_URL + data.profileImg}
+                    src={data.profileImg}
                     alt="가게 프로필 미리보기"
                   />
                 </ImagePreviewContainer>

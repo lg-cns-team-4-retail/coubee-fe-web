@@ -175,15 +175,9 @@ const ViewStorePage = () => {
 
       {loading === "succeeded" && storeData && (
         <>
-          <StoreBanner
-            src={`${IMG_BASE_URL}${storeData.backImg}`}
-            alt="가게 배너 이미지"
-          />
+          <StoreBanner src={storeData.backImg} alt="가게 배너 이미지" />
           <ProfileImageContainer>
-            <ProfileImage
-              src={`${IMG_BASE_URL}${storeData.profileImg}`}
-              alt="가게 프로필 이미지"
-            />
+            <ProfileImage src={storeData.profileImg} alt="가게 프로필 이미지" />
           </ProfileImageContainer>
           <StoreContainer>
             <ProfileAndNavContainer>

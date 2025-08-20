@@ -61,7 +61,7 @@ const StoreLogo = styled.img`
   width: 80px;
   height: 80px;
   background-image: ${({ profileImg }) =>
-    profileImg ? `url(${IMG_BASE_URL + profileImg})` : "none"};
+    profileImg ? `url(${profileImg})` : "none"};
   background-color: ${({ profileImg }) =>
     profileImg ? "transparent" : "white"};
   border-radius: 50%;
@@ -179,7 +179,7 @@ const StoreCard = ({ data }) => {
   return (
     <>
       <StoreCardContainer onClick={handleCardClick}>
-        <CardImageContainer backgroundImage={IMG_BASE_URL + backImg}>
+        <CardImageContainer backgroundImage={backImg}>
           <StatusChip status={status}>
             {status === "PENDING"
               ? "심사 중"
@@ -191,7 +191,7 @@ const StoreCard = ({ data }) => {
           {profileImg ? (
             <StoreLogo
               profileImg={profileImg}
-              src={IMG_BASE_URL + profileImg}
+              src={profileImg}
               alt={`${storeName} logo`}
             />
           ) : (

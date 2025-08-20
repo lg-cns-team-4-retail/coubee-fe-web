@@ -254,7 +254,7 @@ const PreviewComponent = ({ data }) => {
                 <BizImagePreview
                   src={
                     typeof data.bizImg === "string"
-                      ? IMG_BASE_URL + data.bizImg
+                      ? data.bizImg
                       : URL.createObjectURL(data.bizImg)
                   }
                   alt="사업자 등록증"
@@ -291,7 +291,7 @@ const PreviewComponent = ({ data }) => {
     <Wrapper>
       <PreviewContainer>
         <ProfileHeader>
-          <BackgroundImage src={IMG_BASE_URL + data.backImg} />
+          <BackgroundImage src={data.backImg} />
         </ProfileHeader>
         <ProfileInfo>
           <ProfilePictureContainer>
@@ -299,7 +299,7 @@ const PreviewComponent = ({ data }) => {
               <ProfilePicture
                 src={
                   typeof data.profileImg === "string"
-                    ? IMG_BASE_URL + data.profileImg
+                    ? data.profileImg
                     : URL.createObjectURL(data.profileImg)
                 }
                 alt="Profile"

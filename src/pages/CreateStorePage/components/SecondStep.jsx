@@ -138,10 +138,7 @@ const SecondStep = ({ data, onChange, onImageUpload, errors, resetImage }) => {
           </FormLabel>
           {data.bizImg ? (
             <ImagePreviewContainer>
-              <ImagePreview
-                src={IMG_BASE_URL + data.bizImg}
-                alt="사업자 등록증"
-              />
+              <ImagePreview src={data.bizImg} alt="사업자 등록증" />
             </ImagePreviewContainer>
           ) : (
             <ImageUploader

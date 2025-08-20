@@ -127,7 +127,7 @@ const ItemCard = ({ item, onEditClick }) => {
   return (
     <CardContainer onClick={onEditClick}>
       <ImageContainer>
-        <ProductImage src={IMG_BASE_URL + productImg} alt={productName} />
+        <ProductImage src={productImg} alt={productName} />
       </ImageContainer>
       <Content>
         <Name>{productName}</Name>
