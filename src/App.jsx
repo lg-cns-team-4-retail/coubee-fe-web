@@ -9,6 +9,7 @@ import RegistrationPage from "./pages/RegistrationPage/RegistrationPage";
 import MyStorePage from "./pages/MyStorePage/MyStorePage";
 import CreateStorePage from "./pages/CreateStorePage/CreateStorePage";
 import ViewStorePage from "./pages/ViewStore/ViewStorePage";
+import SseListener from "./components/SseClient.jsx";
 function App() {
   const [theme, setTheme] = useState("light");
   const currentTheme = theme === "light" ? lightTheme : darkTheme;
@@ -20,6 +21,7 @@ function App() {
   return (
     <ThemeProvider theme={currentTheme}>
       <GlobalStyle />
+      <SseListener />
       <Header />
       <main>
         <Routes>
