@@ -6,6 +6,8 @@ import KakaoMap from "../../../components/KakaoMap";
 import { FaStore, FaMapMarkerAlt, FaClock, FaPhoneAlt } from "react-icons/fa";
 import Button from "../../../components/common/Button";
 import InformationEditModal from "./InformationEditModal";
+import HotdealCard from "./HotdealCard";
+import HotdealEditModal from "./HotdealEditModal";
 
 const InfoSectionContainer = styled.div`
   padding: 1rem 0;
@@ -115,12 +117,11 @@ const MapContainer = styled.div`
 `;
 
 const EditLinkButton = styled(Button)`
-  background-color: transparent;
-  border: 1px solid ${({ theme }) => theme.primary};
-  color: ${({ theme }) => theme.primary};
+  background-color: ${({ theme }) => theme.primary};
+
   padding: 0.4rem 0.8rem;
   border-radius: 8px;
-  font-size: 0.8rem;
+  font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
 
@@ -134,6 +135,8 @@ const EditLinkButton = styled(Button)`
 const InformationSection = ({ mapReady }) => {
   const storeData = useSelector((store) => store.viewStore.storeData);
   const [isEditModal, setIsEditModal] = useState(false);
+  const [isHotdealModal, setIsHotdealModal] = useState(false);
+
   const closeIsEditModal = () => {
     setIsEditModal(false);
   };
@@ -156,10 +159,21 @@ const InformationSection = ({ mapReady }) => {
     <InfoSectionContainer>
       <TitleContainer>
         <Title>가게 소개</Title>
-        <EditLinkButton onClick={() => setIsEditModal(true)}>
-          수정하기
-        </EditLinkButton>
+        <div>
+          <EditLinkButton
+            onClick={() => setIsHotdealModal(true)}
+            style={{ marginRight: "0.5rem" }}
+          >
+            핫딜 관리
+          </EditLinkButton>
+          <EditLinkButton onClick={() => setIsEditModal(true)}>
+            정보 수정
+          </EditLinkButton>
+        </div>
       </TitleContainer>
+
+      <HotdealCard />
+
       <InfoCard onClick={() => setIsEditModal(true)}>
         <InfoRow>
           <IconWrapper>
@@ -219,6 +233,10 @@ const InformationSection = ({ mapReady }) => {
       </InfoCard>
 
       <InformationEditModal isOpen={isEditModal} onClose={closeIsEditModal} />
+      <HotdealEditModal
+        isOpen={isHotdealModal}
+        onClose={() => setIsHotdealModal(false)}
+      />
     </InfoSectionContainer>
   );
 };
