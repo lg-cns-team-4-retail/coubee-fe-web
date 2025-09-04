@@ -132,11 +132,10 @@ const EditLinkButton = styled(Button)`
   }
 `;
 
-const InformationSection = ({ mapReady }) => {
+const InformationSection = () => {
   const storeData = useSelector((store) => store.viewStore.storeData);
   const [isEditModal, setIsEditModal] = useState(false);
   const [isHotdealModal, setIsHotdealModal] = useState(false);
-
   const closeIsEditModal = () => {
     setIsEditModal(false);
   };

@@ -10,6 +10,7 @@ import productReducer from "./slices/productSlice";
 //rtk query용
 import { productApi } from "./api/productApi";
 import { hotdealApi } from "./api/hotdealApi";
+import { orderApi } from "./api/orderApi";
 
 const persistConfig = {
   key: "root",
@@ -26,6 +27,7 @@ const rootReducer = combineReducers({
   product: productReducer,
   [productApi.reducerPath]: productApi.reducer,
   [hotdealApi.reducerPath]: hotdealApi.reducer,
+  [orderApi.reducerPath]: orderApi.reducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -44,7 +46,11 @@ export const store = configureStore({
           "persist/FLUSH",
         ],
       },
-    }).concat(productApi.middleware, hotdealApi.middleware),
+    }).concat(
+      productApi.middleware,
+      hotdealApi.middleware,
+      orderApi.middleware
+    ),
 });
 
 export const persistor = persistStore(store);

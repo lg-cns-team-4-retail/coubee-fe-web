@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
 import { GlobalStyle, lightTheme, darkTheme } from "./styles/theme";
 import Header from "./components/Header.jsx";
@@ -8,8 +8,13 @@ import LoginPage from "./pages/LoginPage/LoginPage";
 import RegistrationPage from "./pages/RegistrationPage/RegistrationPage";
 import MyStorePage from "./pages/MyStorePage/MyStorePage";
 import CreateStorePage from "./pages/CreateStorePage/CreateStorePage";
+//view store page & components
 import ViewStorePage from "./pages/ViewStore/ViewStorePage";
-import SseListener from "./components/SseClient.jsx";
+import InformationSection from "./pages/ViewStore/components/InformationSection.jsx";
+import ItemSection from "./pages/ViewStore/components/ItemSection.jsx";
+import OrderSection from "./pages/ViewStore/components/Order/OrderSection";
+
+import SseListener from "./components/SseClient2.jsx";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -43,7 +48,16 @@ function App() {
           <Route path="/registration" element={<RegistrationPage />} />
           <Route path="/my-store" element={<MyStorePage />} />
           <Route path="/create-store" element={<CreateStorePage />} />
-          <Route path="/view-store/:id" element={<ViewStorePage />} />
+          <Route path="/view-store/:id" element={<ViewStorePage />}>
+            <Route index element={<Navigate to="product" replace />} />
+            <Route path="product" element={<ItemSection />} />
+            <Route path="info" element={<InformationSection />} />
+            <Route path="orders" element={<OrderSection />} />
+            {/* 향후 추가될 탭들도 여기에 추가하면 됩니다.
+              <Route path="chart" element={<ChartSection />} />
+              <Route path="orders" element={<OrderHistorySection />} />
+            */}
+          </Route>
         </Routes>
       </main>
     </ThemeProvider>

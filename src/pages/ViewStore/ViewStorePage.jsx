@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Outlet, NavLink } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   resetViewStoreStatus,
@@ -8,10 +8,8 @@ import {
 } from "../../redux/slices/viewStoreSlice";
 import StoreSkeleton from "./components/StoreSkeleton";
 import NotificationModal from "../../components/NotificationModal";
-import InformationSection from "./components/InformationSection";
-import ItemSection from "./components/ItemSection";
+
 import useKakaoLoader from "../../components/useKakaoLoader";
-const IMG_BASE_URL = import.meta.env.VITE_IMG_URL;
 
 const Main = styled.div`
   max-width: 100%;
@@ -117,22 +115,24 @@ const TabNavContainer = styled.div`
   }
 `;
 
-const StyledTabButton = styled.button`
+const StyledTabNavLink = styled(NavLink)`
   padding: 0.5rem 0.25rem;
   font-size: 1.125rem;
-  font-weight: ${({ active }) => (active ? "700" : "500")};
+  font-weight: 500;
+  color: #6b7280;
+  text-decoration: none;
   transition: color 0.3s;
-  border: none;
-  background: none;
-  cursor: pointer;
   border-bottom: 2px solid transparent;
-
-  color: ${({ active, theme }) => (active ? theme.primary : "#6b7280")};
-  border-color: ${({ active, theme }) =>
-    active ? theme.primary : "transparent"};
 
   &:hover {
     color: ${({ theme }) => theme.secondary};
+  }
+
+  /* NavLink의 active 클래스를 활용하여 활성 탭 스타일을 적용합니다. */
+  &.active {
+    font-weight: 700;
+    color: ${({ theme }) => theme.primary};
+    border-color: ${({ theme }) => theme.primary};
   }
 `;
 
@@ -142,12 +142,12 @@ const TabContent = styled.div`
   padding: 0 1rem 1rem 1rem;
 `;
 
-const TABS = {
-  정보: InformationSection,
-  상품: ItemSection,
-  차트: () => <div>차트 정보</div>, // Placeholder
-  주문내역: () => <div>주문 내역</div>, // Placeholder
-};
+const TABS = [
+  { path: "product", name: "상품" },
+  { path: "info", name: "정보" },
+  // { path: "chart", name: "차트" },
+  { path: "orders", name: "주문내역" },
+];
 
 const ViewStorePage = () => {
   const { id } = useParams();
@@ -167,8 +167,6 @@ const ViewStorePage = () => {
     dispatch(viewStoreDetail(id));
   }, [dispatch, id]);
 
-  const ActiveSection = TABS[activeTab];
-
   return (
     <Main>
       {(loading === "pending" || loading === "idle") && <StoreSkeleton />}
@@ -186,38 +184,19 @@ const ViewStorePage = () => {
               </StoreInfo>
               <TabNav>
                 <TabNavContainer>
-                  {Object.keys(TABS).map((tab) => (
-                    <StyledTabButton
-                      key={tab}
-                      active={activeTab === tab}
-                      onClick={() => setActiveTab(tab)}
-                    >
-                      {tab}
-                    </StyledTabButton>
+                  {TABS.map((tab) => (
+                    <StyledTabNavLink key={tab.path} to={tab.path}>
+                      {tab.name}
+                    </StyledTabNavLink>
                   ))}
                 </TabNavContainer>
               </TabNav>
             </ProfileAndNavContainer>
 
             <ContentWrapper>
-              {/* <TabContent>
-                <ActiveSection mapReady={!mapLoading} />
-              </TabContent> */}
-              {Object.entries(TABS).map(([tabName, TabComponent]) => (
-                <div
-                  key={tabName}
-                  style={{
-                    display: activeTab === tabName ? "flex" : "none",
-                    flexDirection: "column",
-                    height: "100%",
-                    overflow: "hidden",
-                  }}
-                >
-                  <TabContent>
-                    <TabComponent mapReady={!mapLoading} />
-                  </TabContent>
-                </div>
-              ))}
+              <TabContent>
+                <Outlet context={{ mapReady: !mapLoading }} />
+              </TabContent>
             </ContentWrapper>
           </StoreContainer>
         </>

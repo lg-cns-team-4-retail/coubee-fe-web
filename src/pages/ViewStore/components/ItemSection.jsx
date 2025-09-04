@@ -161,7 +161,10 @@ const ItemSection = () => {
         </EditLinkButton>
       </TitleContainer>
       <ItemContainer>
-        {isLoading && <ItemSkeleton />}
+        {isLoading &&
+          Array.from({ length: 6 }).map((_, index) => (
+            <ItemSkeleton key={`initial-skeleton-${index}`} />
+          ))}
 
         {products.length > 0 &&
           products.map((product) => (
@@ -173,7 +176,13 @@ const ItemSection = () => {
           ))}
       </ItemContainer>
 
-      {isFetching && !isLoading && <ItemSkeleton />}
+      {isFetching && !isLoading && (
+        <ItemContainer>
+          {Array.from({ length: 3 }).map((_, index) => (
+            <ItemSkeleton key={`fetch-skeleton-${index}`} />
+          ))}
+        </ItemContainer>
+      )}
 
       {!isFetching && !last && (
         <div ref={observerRef} style={{ height: "10px" }} />

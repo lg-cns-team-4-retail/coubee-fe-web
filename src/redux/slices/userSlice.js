@@ -14,15 +14,14 @@ export const loginUser = createAsyncThunk(
 
       const responseData = response.data.data;
       console.log(responseData);
+
       if (typeof window !== "undefined" && responseData) {
-        localStorage.setItem(
-          "accessToken",
-          responseData.accessRefreshToken.access.token
-        );
-        localStorage.setItem(
-          "refreshToken",
-          responseData.accessRefreshToken.refresh.token
-        );
+        const { access, refresh } = responseData.accessRefreshToken;
+        const expiresInSeconds = access.expiresIn;
+        const expirationTime = Date.now() + expiresInSeconds * 1000 - 5000;
+        localStorage.setItem("accessToken", access.token);
+        localStorage.setItem("accessTokenExpiresIn", expirationTime);
+        localStorage.setItem("refreshToken", refresh.token);
       }
 
       return responseData.userInfo;
@@ -66,6 +65,7 @@ const userSlice = createSlice({
       if (typeof window !== "undefined") {
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
+        localStorage.removeItem("accessExpiresIn");
       }
     },
   },
