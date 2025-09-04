@@ -53,7 +53,7 @@ const MyStorePage = () => {
   }, [dispatch]);
 
   return (
-    <PageContainer>
+    <PageContainer data-testid="my-store-root">
       <TitleContainer>
         <Text variant="h4" weight="bold">
           {userInfo?.nickname || "사용자"}님의 매장 정보
