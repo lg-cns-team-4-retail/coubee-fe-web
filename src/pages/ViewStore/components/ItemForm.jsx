@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import styled, { css } from "styled-components";
 import ImageUploader from "../../../components/ImageUploader";
 import Input from "../../../components/common/Input";
-import Button from "../../../components/common/Button";
-import { useParams } from "react-router-dom";
+import Textarea from "../../../components/common/TextArea";
 
 const IMG_BASE_URL = import.meta.env.VITE_IMG_URL;
 
@@ -99,7 +98,7 @@ const ItemForm = ({ data, onFormChange, onImageUpload, resetImage }) => {
           onChange={onFormChange}
           required
         />
-        <Input
+        <Textarea
           label="설명"
           id="description"
           name="description"

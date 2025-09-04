@@ -8,6 +8,8 @@ import myStoreReducer from "./slices/myStoreSlice";
 import viewStoreReducer from "./slices/viewStoreSlice";
 import productReducer from "./slices/productSlice";
 
+import { productApi } from "./api/productApi";
+
 const persistConfig = {
   key: "root",
   version: 1,
@@ -21,6 +23,7 @@ const rootReducer = combineReducers({
   myStore: myStoreReducer,
   viewStore: viewStoreReducer,
   product: productReducer,
+  [productApi.reducerPath]: productApi.reducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -29,8 +32,17 @@ export const store = configureStore({
   reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false,
-    }),
+      serializableCheck: {
+        ignoredActions: [
+          "persist/PERSIST",
+          "persist/REHYDRATE",
+          "persist/PAUSE",
+          "persist/PURGE",
+          "persist/REGISTER",
+          "persist/FLUSH",
+        ],
+      },
+    }).concat(productApi.middleware),
 });
 
 export const persistor = persistStore(store);

@@ -1,0 +1,8 @@
+.Toastify__toast-theme--light {
+  background-color: #8e6559; /* 원하시는 배경색 */
+  color: white; /* 원하시는 글자색 (닫기 버튼 아이콘 색도 함께 변경됩니다) */
+}
+
+.Toastify__progress-bar-theme--light {
+  background: #d9c2a9; /* 배경과 어울리는 밝은 색으로 진행 바를 설정합니다. */
+}
