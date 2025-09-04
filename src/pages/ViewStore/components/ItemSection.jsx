@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import styled from "styled-components";
 import { useSelector, useDispatch } from "react-redux";
 
@@ -9,7 +9,7 @@ import EmptyItems from "./EmptyItem";
 import ItemSkeleton from "./ItemSkeleton";
 import ItemCard from "./ItemCard";
 import ItemModal from "./ItemModal";
-
+import { useGetProductsQuery } from "../../../redux/api/productApi";
 const ItemSectionContainer = styled.div`
   padding: 1rem 0;
   display: flex;
@@ -71,17 +71,48 @@ const ItemSection = () => {
   const { storeId } = useSelector((state) => state.viewStore.storeData);
   const dispatch = useDispatch();
   const [page, setPage] = useState(0);
-  const { status, products } = useSelector((state) => state.product);
+
+  const {
+    data: productData,
+    isLoading,
+    isFetching,
+    isError,
+  } = useGetProductsQuery(
+    {
+      storeId,
+      page,
+      size: 9,
+      sort: "productName,ASC",
+    },
+    {
+      skip: !storeId,
+    }
+  );
+
+  const products = productData?.content || [];
+  const last = productData?.last || false;
+
+  const observerRef = useRef(null);
+  const handleObserver = useCallback(
+    (entries) => {
+      const [target] = entries;
+      if (target.isIntersecting && !isFetching && !last) {
+        setPage((prevPage) => prevPage + 1);
+      }
+    },
+    [isFetching, last]
+  );
 
   useEffect(() => {
-    const request = {
-      page,
-      size: 10,
-      sort: "productName,ASC",
-      storeId,
-    };
-    dispatch(fetchProducts(request));
+    if (page === 0) {
+      window.scrollTo(0, 0);
+    }
   }, [page]);
+  useEffect(() => {
+    const observer = new IntersectionObserver(handleObserver, { threshold: 0 });
+    if (observerRef.current) observer.observe(observerRef.current);
+    return () => observer.disconnect();
+  }, [handleObserver]);
 
   const handleOpenCreateModal = () => {
     setFormData({
@@ -130,13 +161,9 @@ const ItemSection = () => {
         </EditLinkButton>
       </TitleContainer>
       <ItemContainer>
-        {status === "loading" &&
-          Array.from({ length: 6 }).map((_, index) => (
-            <ItemSkeleton key={index} />
-          ))}
+        {isLoading && <ItemSkeleton />}
 
-        {status === "succeeded" &&
-          products.length > 0 &&
+        {products.length > 0 &&
           products.map((product) => (
             <ItemCard
               key={product.productId}
@@ -146,7 +173,13 @@ const ItemSection = () => {
           ))}
       </ItemContainer>
 
-      {status === "succeeded" && products.length === 0 && (
+      {isFetching && !isLoading && <ItemSkeleton />}
+
+      {!isFetching && !last && (
+        <div ref={observerRef} style={{ height: "10px" }} />
+      )}
+
+      {!isFetching && !isLoading && products.length === 0 && (
         <EmptyItems onButtonClick={handleOpenCreateModal} />
       )}
 

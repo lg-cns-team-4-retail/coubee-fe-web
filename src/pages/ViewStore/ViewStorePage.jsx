@@ -200,9 +200,24 @@ const ViewStorePage = () => {
             </ProfileAndNavContainer>
 
             <ContentWrapper>
-              <TabContent>
+              {/* <TabContent>
                 <ActiveSection mapReady={!mapLoading} />
-              </TabContent>
+              </TabContent> */}
+              {Object.entries(TABS).map(([tabName, TabComponent]) => (
+                <div
+                  key={tabName}
+                  style={{
+                    display: activeTab === tabName ? "flex" : "none",
+                    flexDirection: "column",
+                    height: "100%",
+                    overflow: "hidden",
+                  }}
+                >
+                  <TabContent>
+                    <TabComponent mapReady={!mapLoading} />
+                  </TabContent>
+                </div>
+              ))}
             </ContentWrapper>
           </StoreContainer>
         </>

@@ -1,13 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled, { createGlobalStyle, css } from "styled-components";
 import { FaTimes } from "react-icons/fa";
 import { useSelector, useDispatch } from "react-redux";
 import ImageUploader from "../../../components/ImageUploader";
 import ItemForm from "./ItemForm";
+
 import {
-  createProduct,
-  updateProduct,
-} from "../../../redux/slices/productSlice";
+  useCreateProductMutation,
+  useUpdateProductMutation,
+} from "../../../redux/api/productApi";
+
+import { toast } from "react-toastify";
+
 import NotificationModal from "../../../components/NotificationModal";
 const LockScroll = createGlobalStyle`
   body {
@@ -123,6 +127,31 @@ const ItemModal = ({
 }) => {
   const dispatch = useDispatch();
   const isEditMode = Boolean(itemData && itemData.productId);
+  const [
+    createProduct,
+    {
+      isLoading: isCreating,
+      isSuccess: isCreateSuccess,
+      isError: isCreateError,
+      error: createError,
+      reset: resetCreate,
+    },
+  ] = useCreateProductMutation();
+  const [
+    updateProduct,
+    {
+      isLoading: isUpdating,
+      isSuccess: isUpdateSuccess,
+      isError: isUpdateError,
+      error: updateError,
+      reset: resetUpdate,
+    },
+  ] = useUpdateProductMutation();
+
+  const isLoading = isCreating || isUpdating;
+  const isSuccess = isCreateSuccess || isUpdateSuccess;
+  const isError = isCreateError || isUpdateError;
+  const error = createError || updateError;
 
   const [notification, setNotification] = useState({
     isOpen: false,
@@ -131,33 +160,31 @@ const ItemModal = ({
     modalType: "info",
   });
 
+  useEffect(() => {
+    if (!isOpen) {
+      resetCreate();
+      resetUpdate();
+    }
+  }, [isOpen, resetCreate, resetUpdate]);
+
   const submitItem = async () => {
-    const actionToDispatch = isEditMode
-      ? updateProduct(itemData)
-      : createProduct(itemData);
+    const successMessage = isEditMode
+      ? "상품이 성공적으로 수정되었습니다."
+      : "상품이 성공적으로 등록되었습니다.";
 
     try {
-      const result = await dispatch(actionToDispatch).unwrap();
-
-      setNotification({
-        isOpen: true,
-        title: isEditMode ? "수정 완료" : "등록 완료",
-        message: "작업이 성공적으로 처리되었습니다.",
-        modalType: "success",
-      });
+      if (isEditMode) {
+        await updateProduct(itemData).unwrap();
+      } else {
+        await createProduct(itemData).unwrap();
+      }
+      toast.success(successMessage);
+      onClose();
     } catch (error) {
-      console.error("작업 실패:", error);
-      setNotification({
-        isOpen: true,
-        title: "오류 발생",
-        message: error.message || "작업 중 오류가 발생했습니다.",
-        modalType: "fail",
-      });
+      const errorMessage =
+        error?.data?.message || "작업 중 오류가 발생했습니다.";
+      toast.error(errorMessage);
     }
-  };
-
-  const closeNotification = () => {
-    setNotification({ ...notification, isOpen: false });
   };
 
   if (!isOpen) return null;
@@ -185,23 +212,12 @@ const ItemModal = ({
           </ModalBody>
           <ModalFooter>
             <StyledButton onClick={onClose}>취소</StyledButton>
-            <StyledButton isPrimary onClick={submitItem}>
-              {isEditMode ? "수정하기" : "등록하기"}
+            <StyledButton isPrimary onClick={submitItem} disabled={isLoading}>
+              {isLoading ? "처리 중..." : isEditMode ? "수정하기" : "등록하기"}
             </StyledButton>
           </ModalFooter>
         </ModalContainer>
       </ModalBackdrop>
-
-      <NotificationModal
-        isOpen={notification.isOpen}
-        onClose={closeNotification}
-        title={notification.title}
-        message={notification.message}
-        modalType={notification.modalType}
-        onSuccess={
-          notification.modalType === "success" ? onClose : closeNotification
-        }
-      />
     </>
   );
 };

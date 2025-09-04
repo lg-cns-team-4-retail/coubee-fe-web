@@ -10,6 +10,10 @@ import MyStorePage from "./pages/MyStorePage/MyStorePage";
 import CreateStorePage from "./pages/CreateStorePage/CreateStorePage";
 import ViewStorePage from "./pages/ViewStore/ViewStorePage";
 import SseListener from "./components/SseClient.jsx";
+
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import "./styles/toast-theme.css";
 function App() {
   const [theme, setTheme] = useState("light");
   const currentTheme = theme === "light" ? lightTheme : darkTheme;
@@ -22,6 +26,16 @@ function App() {
     <ThemeProvider theme={currentTheme}>
       <GlobalStyle />
       <SseListener />
+      <ToastContainer
+        position="top-right" // 위치
+        autoClose={3000} // 3초 후 자동 닫힘
+        hideProgressBar={false}
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
       <Header />
       <main>
         <Routes>

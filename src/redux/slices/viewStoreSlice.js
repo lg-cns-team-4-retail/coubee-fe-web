@@ -58,6 +58,12 @@ const viewStoreSlice = createSlice({
       state.error = null;
       state.message = "";
     },
+    updateHotdealStatus: (state, action) => {
+      if (state.storeData) {
+        console.log(action, "action check");
+        state.storeData.hotdeal = action.payload;
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -91,6 +97,7 @@ const viewStoreSlice = createSlice({
   },
 });
 
-export const { resetViewStoreStatus } = viewStoreSlice.actions;
+export const { resetViewStoreStatus, updateHotdealStatus } =
+  viewStoreSlice.actions;
 
 export default viewStoreSlice.reducer;
