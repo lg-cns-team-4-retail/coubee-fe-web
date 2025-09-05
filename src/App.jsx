@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
 import { GlobalStyle, lightTheme, darkTheme } from "./styles/theme";
 import Header from "./components/Header.jsx";
@@ -8,6 +8,7 @@ import LoginPage from "./pages/LoginPage/LoginPage";
 import RegistrationPage from "./pages/RegistrationPage/RegistrationPage";
 import MyStorePage from "./pages/MyStorePage/MyStorePage";
 import CreateStorePage from "./pages/CreateStorePage/CreateStorePage";
+import OrderDetailPage from "./pages/OrderDetailPage/OrderDetailPage";
 //view store page & components
 import ViewStorePage from "./pages/ViewStore/ViewStorePage";
 import InformationSection from "./pages/ViewStore/components/InformationSection.jsx";
@@ -52,11 +53,12 @@ function App() {
             <Route index element={<Navigate to="product" replace />} />
             <Route path="product" element={<ItemSection />} />
             <Route path="info" element={<InformationSection />} />
-            <Route path="orders" element={<OrderSection />} />
-            {/* 향후 추가될 탭들도 여기에 추가하면 됩니다.
-              <Route path="chart" element={<ChartSection />} />
-              <Route path="orders" element={<OrderHistorySection />} />
-            */}
+            <Route path="orders" element={<Outlet />}>
+              {/* '/view-store/:id/orders' 경로일 때 주문 목록을 보여줍니다. */}
+              <Route index element={<OrderSection />} />
+              {/* '/view-store/:id/orders/:orderId' 경로일 때 주문 상세를 보여줍니다. */}
+              <Route path=":orderId" element={<OrderDetailPage />} />
+            </Route>
           </Route>
         </Routes>
       </main>

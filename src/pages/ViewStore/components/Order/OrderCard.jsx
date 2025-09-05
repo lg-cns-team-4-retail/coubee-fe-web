@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import Text from "../../../../components/common/Text";
 import Button from "../../../../components/common/Button";
+import { useNavigate } from "react-router-dom";
 
 const Card = styled.div`
   background-color: white;
@@ -9,6 +10,15 @@ const Card = styled.div`
   border: 1px solid #eae4de;
   padding: 1.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
 `;
 
 const CardHeader = styled.div`
@@ -69,11 +79,17 @@ const DetailsToggle = styled.button`
 const OrderCard = ({ order }) => {
   const [showDetails, setShowDetails] = useState(true);
 
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    navigate(order.orderId);
+  };
+
   const formatDate = (dateString) =>
     new Date(dateString).toLocaleString("ko-KR");
 
   return (
-    <Card>
+    <Card onClick={handleCardClick}>
       <CardHeader>
         <div>
           <Text weight="bold">{formatDate(order.createdAt)}</Text>

@@ -83,6 +83,19 @@ export const orderApi = createApi({
         { type: "Order", id: orderId },
       ],
     }),
+
+    cancelOrder: builder.mutation({
+      query: ({ orderId, cancelReason }) => ({
+        url: `/order/orders/${orderId}/cancel`,
+        method: "POST", // POST 또는 PATCH/PUT 등 서버 API에 맞는 메소드 사용
+        data: { cancelReason },
+      }),
+      // 주문 취소 성공 시, 목록과 해당 상세 정보 캐시를 모두 무효화
+      invalidatesTags: (result, error, { orderId }) => [
+        { type: "Order", id: "LIST" },
+        { type: "Order", id: orderId },
+      ],
+    }),
   }),
 });
 
@@ -90,4 +103,5 @@ export const {
   useGetOrdersByStoreQuery,
   useGetOrderDetailsQuery,
   useUpdateOrderStatusMutation,
+  useCancelOrderMutation,
 } = orderApi;
