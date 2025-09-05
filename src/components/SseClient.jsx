@@ -7,17 +7,14 @@ import axios from "axios";
 export default function SseListener() {
   const API_BASE_URL = import.meta.env.VITE_API_URL;
   const esRef = useRef(null);
-  const reconnectTimeoutRef = useRef(null);
-  const reconnectCountRef = useRef(0);
+  const reconnectAttempts = useRef(0);
   const heartbeatTimeoutRef = useRef(null);
+  const connectionTimeoutRef = useRef(null);
   const isConnectingRef = useRef(false);
+  const maxReconnectAttempts = 5;
   const { isLoggedIn } = useSelector((state) => state.user);
 
-  const MAX_RECONNECT_ATTEMPTS = 10;
-  const INITIAL_RECONNECT_DELAY = 2000; // 2초로 증가
-  const MAX_RECONNECT_DELAY = 30000;
-  const HEARTBEAT_TIMEOUT = 45000; // 45초 (서버 heartbeat 15초 + 여유시간)
-
+  // Toast 컴포넌트
   const ToastComponent = ({ closeToast, title, message, url }) => {
     const handleClick = () => {
       if (url) {
@@ -34,12 +31,11 @@ export default function SseListener() {
     );
   };
 
+  // 토큰 갱신 함수
   const refreshTokenAndGet = async () => {
     try {
       const refreshToken = localStorage.getItem("refreshToken");
       if (!refreshToken) throw new Error("리프레시 토큰이 없습니다.");
-
-      const API_BASE_URL = import.meta.env.VITE_API_URL;
 
       const response = await axios.post(
         `${API_BASE_URL}/user/auth/refresh`,
@@ -66,203 +62,25 @@ export default function SseListener() {
     return null;
   };
 
+  // Heartbeat 타임아웃 리셋
   const resetHeartbeatTimeout = useCallback(() => {
     if (heartbeatTimeoutRef.current) {
       clearTimeout(heartbeatTimeoutRef.current);
     }
 
     heartbeatTimeoutRef.current = setTimeout(() => {
-      console.warn("💔 Heartbeat timeout - attempting reconnection");
+      console.warn("💔 Heartbeat timeout - 재연결 시도");
       if (esRef.current && esRef.current.readyState !== EventSource.CLOSED) {
         esRef.current.close();
       }
       esRef.current = null;
       connectSSE();
-    }, HEARTBEAT_TIMEOUT);
+    }, 40000); // 40초 타임아웃 (적당히 단축)
   }, []);
 
-  const getReconnectDelay = useCallback(() => {
-    const delay = Math.min(
-      INITIAL_RECONNECT_DELAY *
-        Math.pow(2, Math.min(reconnectCountRef.current, 4)),
-      MAX_RECONNECT_DELAY
-    );
-    return delay + Math.random() * 1000;
-  }, []);
-
-  /*  const connectSSE = useCallback(() => {
-    const token = getToken();
-    if (!token || !isLoggedIn || isConnectingRef.current) {
-      return;
-    }
-
-    if (esRef.current) {
-      try {
-        if (esRef.current.readyState !== EventSource.CLOSED) {
-          esRef.current.close();
-        }
-      } catch (e) {
-        console.debug("Error closing existing connection:", e);
-      }
-      esRef.current = null;
-    }
-
-    isConnectingRef.current = true;
-
-    try {
-      console.log(
-        `🔄 SSE 연결 시도... (시도 횟수: ${reconnectCountRef.current + 1})`
-      );
-
-      // Native EventSource 사용 (더 안정적)
-      const eventSource = new EventSourcePolyfill(
-        `${API_BASE_URL}/notification/subscribe`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: "text/event-stream",
-            "Cache-Control": "no-cache",
-          },
-          heartbeatTimeout: 50000, // 50초로 증가
-          silentTimeout: 10000, // 10초 대기
-        }
-      );
-
-      esRef.current = eventSource;
-
-      // 연결 성공
-      eventSource.addEventListener("open", () => {
-        console.log("✅ SSE 연결 성공");
-        reconnectCountRef.current = 0;
-        isConnectingRef.current = false;
-        resetHeartbeatTimeout();
-      });
-
-      // 초기 연결 메시지
-      eventSource.addEventListener("INIT", (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          console.log("🔗 SSE 초기화 완료:", data);
-          resetHeartbeatTimeout();
-        } catch (e) {
-          console.log("🔗 SSE 초기화 완료:", event.data);
-          resetHeartbeatTimeout();
-        }
-      });
-
-      // Heartbeat 처리
-      eventSource.addEventListener("HEARTBEAT", (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          if (data.type === "initial_heartbeat") {
-            console.log("💓 초기 Heartbeat 수신");
-          } else {
-            console.log("💓 Heartbeat 수신");
-          }
-          resetHeartbeatTimeout();
-        } catch (e) {
-          console.log("💓 Heartbeat 수신");
-          resetHeartbeatTimeout();
-        }
-      });
-
-      // 연결 교체 알림
-      eventSource.addEventListener("CONNECTION_REPLACED", (event) => {
-        console.log("🔄 연결이 다른 탭에서 교체됨:", event.data);
-        cleanup();
-        return;
-      });
-
-      // 주문 알림 처리
-      eventSource.addEventListener("ORDER_NOTIFICATION", (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          console.log("📦 주문 알림 수신:", data);
-          resetHeartbeatTimeout();
-          handleOrderNotification(data);
-        } catch (err) {
-          console.error("주문 알림 파싱 오류:", err);
-        }
-      });
-
-      // 일반 메시지 처리
-      eventSource.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          console.log("📨 SSE 메시지 수신:", data);
-          resetHeartbeatTimeout();
-          handleSSEMessage(data);
-        } catch (err) {
-          console.log("📨 SSE 원시 메시지:", event.data);
-          resetHeartbeatTimeout();
-        }
-      };
-
-      // 에러 처리
-      eventSource.onerror = (error) => {
-        isConnectingRef.current = false;
-
-        // 타임아웃 에러는 경고로 처리
-        const errorMsg =
-          error.error?.message || error.message || "Unknown error";
-        if (
-          errorMsg.includes("1000 milliseconds") ||
-          errorMsg.includes("timeout")
-        ) {
-          console.warn("⚠️ 연결 타임아웃 (정상적인 재연결 과정)");
-        } else {
-          console.error("❌ SSE 연결 오류:", error);
-        }
-
-        if (esRef.current) {
-          try {
-            if (esRef.current.readyState !== EventSource.CLOSED) {
-              esRef.current.close();
-            }
-          } catch (e) {
-            console.debug("Error closing connection on error:", e);
-          }
-          esRef.current = null;
-        }
-
-        clearTimeout(heartbeatTimeoutRef.current);
-
-        // 재연결 시도
-        if (reconnectCountRef.current < MAX_RECONNECT_ATTEMPTS && isLoggedIn) {
-          const delay = getReconnectDelay();
-          console.log(`🔄 ${Math.round(delay)}ms 후 재연결 시도...`);
-
-          reconnectTimeoutRef.current = setTimeout(() => {
-            reconnectCountRef.current++;
-            connectSSE();
-          }, delay);
-        } else {
-          console.error("🚫 최대 재연결 시도 횟수 초과");
-          reconnectCountRef.current = 0;
-        }
-      };
-    } catch (err) {
-      isConnectingRef.current = false;
-      console.error("SSE 초기화 실패:", err);
-
-      if (reconnectCountRef.current < MAX_RECONNECT_ATTEMPTS && isLoggedIn) {
-        const delay = getReconnectDelay();
-        reconnectTimeoutRef.current = setTimeout(() => {
-          reconnectCountRef.current++;
-          connectSSE();
-        }, delay);
-      }
-    }
-  }, [isLoggedIn, API_BASE_URL, resetHeartbeatTimeout, getReconnectDelay]);
- */
-
+  // 주문 알림 처리
   const handleOrderNotification = useCallback((data) => {
-    console.log("주문 상태 변경:", {
-      messageType: data.messageType,
-      title: data.title,
-      message: data.message,
-      userId: data.userId,
-    });
+    console.log("📦 주문 알림 수신:", data);
 
     const { title, message, storeId } = data;
 
@@ -272,225 +90,222 @@ export default function SseListener() {
           closeToast={closeToast}
           title={title}
           message={message}
-          url={"/view-store/1177"}
+          url={storeId ? `/view-store/${storeId}` : "/view-store/1177"}
         />
       ),
       {
-        autoClose: false, // 자동으로 닫히지 않는 기능은 유지
-        closeOnClick: false, // 📜 라이브러리의 기본 클릭-닫기 기능은 비활성화합니다.
+        autoClose: false,
+        closeOnClick: false,
       }
     );
 
     if (Notification.permission === "granted") {
-      new Notification(data.title, {
-        body: data.message,
+      new Notification(title, {
+        body: message,
         icon: "/notification-icon.png",
-        tag: `order-${data.userId}-${data.messageType}`,
+        tag: `order-${data.userId || Date.now()}-${data.messageType}`,
       });
     }
   }, []);
 
+  // SSE 연결 함수
   const connectSSE = useCallback(async () => {
-    // 📜 2. async 함수로 변경
-    if (!isLoggedIn || isConnectingRef.current) {
+    if (!isLoggedIn) {
+      console.log("❌ 로그인되지 않아 연결 중단");
+      return;
+    }
+
+    if (esRef.current || isConnectingRef.current) {
+      console.log("⚠️ 이미 연결 중이거나 연결이 존재함");
       return;
     }
 
     isConnectingRef.current = true;
 
     try {
-      // 📜 3. SSE 연결 전에 토큰 만료 여부를 확인하고 갱신합니다.
+      // 토큰 만료 확인 및 갱신
       const expiresIn = localStorage.getItem("expiresIn");
       let token = localStorage.getItem("accessToken");
 
-      // 만료 시간이 지났거나, 만료 시간 정보가 없으면 갱신 시도
       if (!expiresIn || Date.now() >= parseInt(expiresIn, 10)) {
-        console.log("🔄 Access Token이 만료되어 갱신을 시도합니다.");
-        token = await refreshTokenAndGet(); // 새 토큰을 받아옵니다.
+        console.log("🔄 토큰 갱신 시도...");
+        token = await refreshTokenAndGet();
       }
 
-      // 토큰이 여전히 없으면 (갱신 실패 포함) 함수를 종료합니다.
       if (!token) {
-        console.error("🚫 유효한 토큰이 없어 SSE 연결을 시작할 수 없습니다.");
+        console.error("🚫 유효한 토큰이 없어 SSE 연결할 수 없습니다.");
         isConnectingRef.current = false;
         return;
       }
 
-      // 기존 연결이 있다면 정리합니다.
-      if (esRef.current && esRef.current.readyState !== EventSource.CLOSED) {
-        esRef.current.close();
-      }
-      esRef.current = null;
+      console.log("🔄 SSE 연결 시도...");
+      // console.log("🔗 연결 URL:", `${API_BASE_URL}/notification/subscribe`);
+      // console.log("🔑 토큰 길이:", token.length);
 
-      console.log(`🔄 SSE 연결 시도...`);
+      // 연결 타임아웃 설정 (10초로 단축)
+      connectionTimeoutRef.current = setTimeout(() => {
+        console.warn("⏰ 연결 타임아웃 - 10초 내 연결되지 않음");
+        isConnectingRef.current = false;
+        if (esRef.current) {
+          esRef.current.close();
+          esRef.current = null;
+        }
+        // 즉시 재시도
+        setTimeout(() => {
+          if (isLoggedIn && !esRef.current && !isConnectingRef.current) {
+            connectSSE();
+          }
+        }, 2000);
+      }, 10000);
+
       const eventSource = new EventSourcePolyfill(
         `${API_BASE_URL}/notification/subscribe`,
         {
           headers: {
-            Authorization: `Bearer ${token}`, // 📜 유효성이 보장된 토큰 사용
-            Accept: "text/event-stream",
-            "Cache-Control": "no-cache",
+            Authorization: `Bearer ${token}`,
           },
-          heartbeatTimeout: 50000,
-          silentTimeout: 10000,
+          heartbeatTimeout: 30000, // 30초로 단축
+          withCredentials: false,
         }
       );
+
       esRef.current = eventSource;
 
-      // ... (이하 모든 event listener 로직은 기존과 동일)
+      // 연결 성공 시 즉시 로그
       eventSource.addEventListener("open", () => {
-        console.log("✅ SSE 연결 성공");
-        reconnectCountRef.current = 0;
+        console.log("🌐 SSE 연결 열림 (open event)");
         isConnectingRef.current = false;
+      });
+
+      eventSource.addEventListener("INIT", () => {
+        console.log("✅ SSE 연결 완료 (INIT event)");
+        isConnectingRef.current = false;
+        reconnectAttempts.current = 0;
+        // 연결 성공시 연결 타임아웃 해제
+        if (connectionTimeoutRef.current) {
+          clearTimeout(connectionTimeoutRef.current);
+        }
         resetHeartbeatTimeout();
       });
-      eventSource.addEventListener("INIT", (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          console.log("🔗 SSE 초기화 완료:", data);
-          resetHeartbeatTimeout();
-        } catch (e) {
-          console.log("🔗 SSE 초기화 완료:", event.data);
-          resetHeartbeatTimeout();
-        }
-      });
+
+      // Heartbeat 처리
       eventSource.addEventListener("HEARTBEAT", (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          if (data.type === "initial_heartbeat") {
-            console.log("💓 초기 Heartbeat 수신");
-          } else {
-            console.log("💓 Heartbeat 수신");
-          }
-          resetHeartbeatTimeout();
-        } catch (e) {
-          console.log("💓 Heartbeat 수신");
-          resetHeartbeatTimeout();
-        }
+        console.log("💓 Heartbeat 수신");
+        resetHeartbeatTimeout();
       });
-      eventSource.addEventListener("CONNECTION_REPLACED", (event) => {
-        console.log("🔄 연결이 다른 탭에서 교체됨:", event.data);
-        cleanup();
-        return;
-      });
+
       eventSource.addEventListener("ORDER_NOTIFICATION", (event) => {
         try {
+          if (!event.data || event.data.trim() === '') {
+            console.warn("⚠️ 빈 ORDER_NOTIFICATION 데이터");
+            resetHeartbeatTimeout();
+            return;
+          }
+          
           const data = JSON.parse(event.data);
-          console.log("📦 주문 알림 수신:", data);
-          resetHeartbeatTimeout();
           handleOrderNotification(data);
+          resetHeartbeatTimeout();
         } catch (err) {
-          console.error("주문 알림 파싱 오류:", err);
+          console.error("주문 알림 파싱 오류:", {
+            error: err.message,
+            data: event.data
+          });
+          resetHeartbeatTimeout(); // 파싱 에러여도 연결 유지
         }
       });
-      eventSource.onmessage = (event) => {
+
+      eventSource.onmessage = (e) => {
         try {
-          const data = JSON.parse(event.data);
-          console.log("📨 SSE 메시지 수신:", data);
+          // 빈 데이터나 공백만 있는 경우 처리
+          if (!e.data || e.data.trim() === '') {
+            console.log("📨 빈 SSE 메시지 수신 (heartbeat일 가능성)");
+            resetHeartbeatTimeout();
+            return;
+          }
+
+          const data = JSON.parse(e.data);
+          console.log("📨 SSE 메시지:", data);
           resetHeartbeatTimeout();
-          handleSSEMessage(data);
         } catch (err) {
-          console.log("📨 SSE 원시 메시지:", event.data);
+          console.warn("⚠️ SSE 파싱 오류 (무시하고 계속):", {
+            error: err.message,
+            data: e.data,
+            dataLength: e.data?.length
+          });
+          // 파싱 에러가 발생해도 heartbeat는 리셋 (연결 유지)
           resetHeartbeatTimeout();
         }
       };
-      eventSource.onerror = (error) => {
+
+      eventSource.onerror = (err) => {
+        console.error("❌ SSE 연결 오류:", err);
+        console.error("🔍 Error details:", {
+          type: err.type,
+          message: err.message || err.error?.message,
+          readyState: esRef.current?.readyState,
+          url: esRef.current?.url,
+        });
+
         isConnectingRef.current = false;
 
-        const errorMsg =
-          error.error?.message || error.message || "Unknown error";
-        if (
-          errorMsg.includes("1000 milliseconds") ||
-          errorMsg.includes("timeout")
-        ) {
-          console.warn("⚠️ 연결 타임아웃 (정상적인 재연결 과정)");
-        } else {
-          console.error("❌ SSE 연결 오류:", error);
-        }
-
         if (esRef.current) {
-          try {
-            if (esRef.current.readyState !== EventSource.CLOSED) {
-              esRef.current.close();
-            }
-          } catch (e) {
-            console.debug("Error closing connection on error:", e);
-          }
+          esRef.current.close();
           esRef.current = null;
         }
 
-        clearTimeout(heartbeatTimeoutRef.current);
+        // 타임아웃들 정리
+        if (heartbeatTimeoutRef.current) {
+          clearTimeout(heartbeatTimeoutRef.current);
+        }
+        if (connectionTimeoutRef.current) {
+          clearTimeout(connectionTimeoutRef.current);
+        }
 
-        if (reconnectCountRef.current < 10 && isLoggedIn) {
-          const delay = getReconnectDelay();
-          console.log(`🔄 ${Math.round(delay)}ms 후 재연결 시도...`);
+        // 빠른 재연결 시도
+        if (reconnectAttempts.current < maxReconnectAttempts && isLoggedIn) {
+          reconnectAttempts.current++;
+          const delay = Math.min(2000 * reconnectAttempts.current, 10000); // 2초씩 증가
+          console.log(
+            `🔄 ${delay}ms 후 재연결 시도 (${reconnectAttempts.current}/${maxReconnectAttempts})`
+          );
 
-          reconnectTimeoutRef.current = setTimeout(() => {
-            reconnectCountRef.current++;
-            connectSSE();
+          setTimeout(() => {
+            if (isLoggedIn) {
+              connectSSE();
+            }
           }, delay);
         } else {
-          console.error("🚫 최대 재연결 시도 횟수 초과");
-          reconnectCountRef.current = 0;
+          console.error("🚫 최대 재연결 시도 횟수 초과 - 10초 후 재시작");
+          reconnectAttempts.current = 0;
+          setTimeout(() => {
+            if (isLoggedIn && !esRef.current) {
+              console.log("🔄 재시작 - 연결 시도");
+              connectSSE();
+            }
+          }, 10000);
         }
       };
     } catch (err) {
-      isConnectingRef.current = false;
       console.error("SSE 초기화 실패:", err);
+      isConnectingRef.current = false;
     }
-  }, [
-    isLoggedIn,
-    API_BASE_URL,
-    resetHeartbeatTimeout,
-    getReconnectDelay,
-    handleOrderNotification,
-  ]);
-
-  const handleSSEMessage = useCallback((data) => {
-    switch (data.messageType) {
-      case "SYSTEM":
-        console.log("🔧 시스템 메시지:", data.message);
-        break;
-      case "PROMOTION":
-        console.log("🎉 프로모션 알림:", data.message);
-        break;
-      default:
-        console.log("📄 일반 메시지:", data);
-    }
-  }, []);
-
-  const cleanup = useCallback(() => {
-    console.log("🧹 SSE 연결 정리");
-
-    isConnectingRef.current = false;
-
-    if (esRef.current) {
-      try {
-        if (esRef.current.readyState !== EventSource.CLOSED) {
-          esRef.current.close();
-        }
-      } catch (e) {
-        console.debug("Error during cleanup:", e);
-      }
-      esRef.current = null;
-    }
-
-    if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current);
-      reconnectTimeoutRef.current = null;
-    }
-
-    if (heartbeatTimeoutRef.current) {
-      clearTimeout(heartbeatTimeoutRef.current);
-      heartbeatTimeoutRef.current = null;
-    }
-
-    reconnectCountRef.current = 0;
-  }, []);
+  }, [isLoggedIn, handleOrderNotification, resetHeartbeatTimeout]);
 
   useEffect(() => {
+    // 로그인 상태가 아니면 연결하지 않음
     if (!isLoggedIn) {
-      cleanup();
+      if (esRef.current) {
+        esRef.current.close();
+        esRef.current = null;
+      }
+      if (heartbeatTimeoutRef.current) {
+        clearTimeout(heartbeatTimeoutRef.current);
+      }
+      if (connectionTimeoutRef.current) {
+        clearTimeout(connectionTimeoutRef.current);
+      }
+      isConnectingRef.current = false;
+      reconnectAttempts.current = 0;
       return;
     }
 
@@ -498,35 +313,28 @@ export default function SseListener() {
       return;
     }
 
+    // 브라우저 알림 권한 요청
     if (Notification.permission === "default") {
       Notification.requestPermission();
     }
 
-    // 1초 후에 연결 시도 (서버 초기화 대기)
-    const initialTimeout = setTimeout(() => {
-      connectSSE();
-    }, 1000);
-
-    const handleVisibilityChange = () => {
-      if (
-        !document.hidden &&
-        isLoggedIn &&
-        !esRef.current &&
-        !isConnectingRef.current
-      ) {
-        console.log("👁️ 페이지 활성화 - 연결 재시도");
-        setTimeout(connectSSE, 500);
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+    connectSSE();
 
     return () => {
-      clearTimeout(initialTimeout);
-      cleanup();
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      if (esRef.current) {
+        esRef.current.close();
+        esRef.current = null;
+      }
+      if (heartbeatTimeoutRef.current) {
+        clearTimeout(heartbeatTimeoutRef.current);
+      }
+      if (connectionTimeoutRef.current) {
+        clearTimeout(connectionTimeoutRef.current);
+      }
+      isConnectingRef.current = false;
+      reconnectAttempts.current = 0;
     };
-  }, [isLoggedIn, connectSSE, cleanup]);
+  }, [isLoggedIn, connectSSE]);
 
   return null;
 }
