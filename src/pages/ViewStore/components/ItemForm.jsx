@@ -80,7 +80,7 @@ const ItemForm = ({ data, onFormChange, onImageUpload, resetImage }) => {
         </FormLabel>
 
         {data.productImg ? (
-          <ImagePreview src={data.productImg} alt="가게 상품 미리보기" />
+          <ImagePreview data-testid="imageUploaded" src={data.productImg} alt="가게 상품 미리보기" />
         ) : (
           <ImageUploader
             type={"productImg"}

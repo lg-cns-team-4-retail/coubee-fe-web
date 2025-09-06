@@ -156,7 +156,7 @@ const ItemSection = () => {
     <ItemSectionContainer>
       <TitleContainer>
         <Title>판매 목록</Title>
-        <EditLinkButton onClick={handleOpenCreateModal}>
+        <EditLinkButton data-testid="itemRegistButton" onClick={handleOpenCreateModal}>
           등록하기
         </EditLinkButton>
       </TitleContainer>

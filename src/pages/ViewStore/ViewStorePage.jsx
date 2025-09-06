@@ -179,7 +179,7 @@ const ViewStorePage = () => {
           <ProfileImageContainer>
             <ProfileImage src={storeData.profileImg} alt="가게 프로필 이미지" />
           </ProfileImageContainer>
-          <StoreContainer>
+          <StoreContainer data-testid="viewStorePageLoaded">
             <ProfileAndNavContainer>
               <StoreInfo>
                 <StoreName>{storeData.storeName}</StoreName>

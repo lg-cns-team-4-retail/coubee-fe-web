@@ -195,7 +195,7 @@ const ItemModal = ({
       <ModalBackdrop>
         <ModalContainer onClick={(e) => e.stopPropagation()}>
           <ModalHeader>
-            <ModalTitle>
+            <ModalTitle data-testid="itemRegistModalLoaded">
               {isEditMode ? "물품 수정하기" : "물품 등록하기"}
             </ModalTitle>
             <CloseButton onClick={onClose}>
@@ -212,7 +212,7 @@ const ItemModal = ({
           </ModalBody>
           <ModalFooter>
             <StyledButton onClick={onClose}>취소</StyledButton>
-            <StyledButton isPrimary onClick={submitItem} disabled={isLoading}>
+            <StyledButton data-testid="itemRegistSubmitButton" isPrimary onClick={submitItem} disabled={isLoading}>
               {isLoading ? "처리 중..." : isEditMode ? "수정하기" : "등록하기"}
             </StyledButton>
           </ModalFooter>

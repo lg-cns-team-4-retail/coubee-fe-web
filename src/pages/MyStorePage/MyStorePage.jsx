@@ -53,8 +53,8 @@ const MyStorePage = () => {
   }, [dispatch]);
 
   return (
-    <PageContainer data-testid="my-store-root">
-      <TitleContainer>
+    <PageContainer>
+      <TitleContainer data-testid="myStorePageLoaded">
         <Text variant="h4" weight="bold">
           {userInfo?.nickname || "사용자"}님의 매장 정보
         </Text>
@@ -65,6 +65,7 @@ const MyStorePage = () => {
         {storeList &&
           storeList.map((item) => (
             <StoreCard
+              data-testid="viewStorePageLoaded"
               onClick={() => {
                 navigate(`/view-store/${item.storeId}`);
               }}
