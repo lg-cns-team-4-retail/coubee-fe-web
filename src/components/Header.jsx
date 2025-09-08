@@ -169,7 +169,7 @@ function Header() {
 
   const LoggedInMenu = () => (
     <NavContainer>
-      <NavButton to="/ask">나의 매장</NavButton>
+      <NavButton to="/my-store">나의 매장</NavButton>
 
       <SecondButton onClick={handleLogout}>
         <FaSignOutAlt /> 로그아웃

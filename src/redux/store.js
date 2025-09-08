@@ -11,7 +11,7 @@ import productReducer from "./slices/productSlice";
 import { productApi } from "./api/productApi";
 import { hotdealApi } from "./api/hotdealApi";
 import { orderApi } from "./api/orderApi";
-
+import { salesApi } from "./api/salesApi";
 const persistConfig = {
   key: "root",
   version: 1,
@@ -28,6 +28,7 @@ const rootReducer = combineReducers({
   [productApi.reducerPath]: productApi.reducer,
   [hotdealApi.reducerPath]: hotdealApi.reducer,
   [orderApi.reducerPath]: orderApi.reducer,
+  [salesApi.reducerPath]: salesApi.reducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -49,7 +50,8 @@ export const store = configureStore({
     }).concat(
       productApi.middleware,
       hotdealApi.middleware,
-      orderApi.middleware
+      orderApi.middleware,
+      salesApi.middleware
     ),
 });
 

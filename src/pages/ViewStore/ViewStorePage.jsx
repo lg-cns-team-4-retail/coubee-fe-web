@@ -145,7 +145,7 @@ const TabContent = styled.div`
 const TABS = [
   { path: "product", name: "상품" },
   { path: "info", name: "정보" },
-  // { path: "chart", name: "차트" },
+  { path: "chart", name: "차트" },
   { path: "orders", name: "주문내역" },
 ];
 

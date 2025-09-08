@@ -14,6 +14,7 @@ import ViewStorePage from "./pages/ViewStore/ViewStorePage";
 import InformationSection from "./pages/ViewStore/components/InformationSection.jsx";
 import ItemSection from "./pages/ViewStore/components/ItemSection.jsx";
 import OrderSection from "./pages/ViewStore/components/Order/OrderSection";
+import ChartSection from "./pages/ViewStore/components/Chart/ChartSection.jsx";
 
 import SseListener from "./components/SseClient.jsx";
 
@@ -53,6 +54,7 @@ function App() {
             <Route index element={<Navigate to="product" replace />} />
             <Route path="product" element={<ItemSection />} />
             <Route path="info" element={<InformationSection />} />
+            <Route path="chart" element={<ChartSection />} />
             <Route path="orders" element={<Outlet />}>
               {/* '/view-store/:id/orders' 경로일 때 주문 목록을 보여줍니다. */}
               <Route index element={<OrderSection />} />

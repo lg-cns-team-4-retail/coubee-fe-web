@@ -82,7 +82,6 @@ const ActionButtons = ({ status, orderId }) => {
         onClose={() => setCancelModalOpen(false)}
         orderId={orderId}
       />
-
       <QRScanModal isOpen={qrModalOpen} onClose={() => setQrModalOpen(false)} />
     </ButtonContainer>
   );
