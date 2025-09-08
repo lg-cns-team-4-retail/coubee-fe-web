@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
 import { GlobalStyle, lightTheme, darkTheme } from "./styles/theme";
+import { useSelector } from "react-redux";
 import Header from "./components/Header.jsx";
 
 import LoginPage from "./pages/LoginPage/LoginPage";
@@ -9,6 +10,7 @@ import RegistrationPage from "./pages/RegistrationPage/RegistrationPage";
 import MyStorePage from "./pages/MyStorePage/MyStorePage";
 import CreateStorePage from "./pages/CreateStorePage/CreateStorePage";
 import OrderDetailPage from "./pages/OrderDetailPage/OrderDetailPage";
+import LandingPage from "./pages/LandingPage/LandingPage";
 //view store page & components
 import ViewStorePage from "./pages/ViewStore/ViewStorePage";
 import InformationSection from "./pages/ViewStore/components/InformationSection.jsx";
@@ -21,6 +23,17 @@ import SseListener from "./components/SseClient.jsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./styles/toast-theme.css";
+
+const PrivateRoute = () => {
+  const { isLoggedIn } = useSelector((state) => state.user);
+  return isLoggedIn ? <Outlet /> : <Navigate to="/" />;
+};
+
+const PublicRoute = () => {
+  const { isLoggedIn } = useSelector((state) => state.user);
+  return isLoggedIn ? <Navigate to="/my-store" /> : <Outlet />;
+};
+
 function App() {
   const [theme, setTheme] = useState("light");
   const currentTheme = theme === "light" ? lightTheme : darkTheme;
@@ -46,20 +59,24 @@ function App() {
       <Header />
       <main>
         <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/registration" element={<RegistrationPage />} />
-          <Route path="/my-store" element={<MyStorePage />} />
-          <Route path="/create-store" element={<CreateStorePage />} />
-          <Route path="/view-store/:id" element={<ViewStorePage />}>
-            <Route index element={<Navigate to="product" replace />} />
-            <Route path="product" element={<ItemSection />} />
-            <Route path="info" element={<InformationSection />} />
-            <Route path="chart" element={<ChartSection />} />
-            <Route path="orders" element={<Outlet />}>
-              {/* '/view-store/:id/orders' 경로일 때 주문 목록을 보여줍니다. */}
-              <Route index element={<OrderSection />} />
-              {/* '/view-store/:id/orders/:orderId' 경로일 때 주문 상세를 보여줍니다. */}
-              <Route path=":orderId" element={<OrderDetailPage />} />
+          <Route element={<PublicRoute />}>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/registration" element={<RegistrationPage />} />
+          </Route>
+
+          <Route element={<PrivateRoute />}>
+            <Route path="/my-store" element={<MyStorePage />} />
+            <Route path="/create-store" element={<CreateStorePage />} />
+            <Route path="/view-store/:id" element={<ViewStorePage />}>
+              <Route index element={<Navigate to="product" replace />} />
+              <Route path="product" element={<ItemSection />} />
+              <Route path="info" element={<InformationSection />} />
+              <Route path="chart" element={<ChartSection />} />
+              <Route path="orders" element={<Outlet />}>
+                <Route index element={<OrderSection />} />
+                <Route path=":orderId" element={<OrderDetailPage />} />
+              </Route>
             </Route>
           </Route>
         </Routes>
