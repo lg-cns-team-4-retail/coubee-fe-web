@@ -82,15 +82,15 @@ export default function SseListener() {
   const handleOrderNotification = useCallback((data) => {
     console.log("📦 주문 알림 수신:", data);
 
-    const { title, message, storeId } = data;
-
+    const { title, message, storeId, messageData } = data;
+    const orderId = messageData.orderId;
     toast.info(
       ({ closeToast }) => (
         <ToastComponent
           closeToast={closeToast}
           title={title}
           message={message}
-          url={storeId ? `/view-store/${storeId}` : "/view-store/1177"}
+          url={`/view-store/${storeId}/orders/${orderId}`}
         />
       ),
       {
@@ -196,19 +196,19 @@ export default function SseListener() {
 
       eventSource.addEventListener("ORDER_NOTIFICATION", (event) => {
         try {
-          if (!event.data || event.data.trim() === '') {
+          if (!event.data || event.data.trim() === "") {
             console.warn("⚠️ 빈 ORDER_NOTIFICATION 데이터");
             resetHeartbeatTimeout();
             return;
           }
-          
+
           const data = JSON.parse(event.data);
           handleOrderNotification(data);
           resetHeartbeatTimeout();
         } catch (err) {
           console.error("주문 알림 파싱 오류:", {
             error: err.message,
-            data: event.data
+            data: event.data,
           });
           resetHeartbeatTimeout(); // 파싱 에러여도 연결 유지
         }
@@ -217,7 +217,7 @@ export default function SseListener() {
       eventSource.onmessage = (e) => {
         try {
           // 빈 데이터나 공백만 있는 경우 처리
-          if (!e.data || e.data.trim() === '') {
+          if (!e.data || e.data.trim() === "") {
             console.log("📨 빈 SSE 메시지 수신 (heartbeat일 가능성)");
             resetHeartbeatTimeout();
             return;
@@ -230,7 +230,7 @@ export default function SseListener() {
           console.warn("⚠️ SSE 파싱 오류 (무시하고 계속):", {
             error: err.message,
             data: e.data,
-            dataLength: e.data?.length
+            dataLength: e.data?.length,
           });
           // 파싱 에러가 발생해도 heartbeat는 리셋 (연결 유지)
           resetHeartbeatTimeout();
