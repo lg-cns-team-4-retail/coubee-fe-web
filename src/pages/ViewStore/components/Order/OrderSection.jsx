@@ -27,9 +27,42 @@ const EmptyOrders = styled.div`
   border-radius: 12px;
 `;
 
+const FilterContainer = styled.div`
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+`;
+
+const SearchInput = styled.input`
+  flex-grow: 1;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+`;
+
+const StatusSelect = styled.select`
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+`;
+
+// 주문 상태 옵션 정의
+const ORDER_STATUSES = [
+  { value: "", label: "전체" },
+  { value: "PAID", label: "결제됨" },
+  { value: "PREPARING", label: "픽업 준비중" },
+  { value: "PREPARED", label: "픽업 준비 완료" },
+  { value: "RECEIVED", label: "수령완료" },
+];
+
 const OrderSection = () => {
   const { storeId } = useSelector((state) => state.viewStore.storeData);
   const [page, setPage] = useState(0);
+  const [keyword, setKeyword] = useState("");
+  const [debouncedKeyword, setDebouncedKeyword] = useState("");
+  const [status, setStatus] = useState(""); // 빈 문자열은 '전체'를 의미
 
   const {
     data: orderData,
@@ -53,6 +86,21 @@ const OrderSection = () => {
   );
 
   useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedKeyword(keyword);
+    }, 500); // 500ms 지연
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [keyword]);
+
+  // 3. 필터 변경 시 페이지를 0으로 초기화
+  useEffect(() => {
+    setPage(0);
+  }, [debouncedKeyword, status]);
+
+  useEffect(() => {
     const observer = new IntersectionObserver(handleObserver, { threshold: 0 });
     if (observerRef.current) observer.observe(observerRef.current);
     return () => observer.disconnect();
@@ -61,6 +109,26 @@ const OrderSection = () => {
   return (
     <SectionContainer>
       <Title>주문 내역</Title>
+
+      <FilterContainer>
+        <SearchInput
+          type="text"
+          placeholder="상품명으로 검색 해보세요"
+          value={keyword}
+          onChange={(e) => setKeyword(e.target.value)}
+        />
+        <StatusSelect
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+        >
+          {ORDER_STATUSES.map((s) => (
+            <option key={s.value} value={s.value}>
+              {s.label}
+            </option>
+          ))}
+        </StatusSelect>
+      </FilterContainer>
+
       {isLoading &&
         Array.from({ length: 3 }).map((_, i) => <OrderSkeleton key={i} />)}
 

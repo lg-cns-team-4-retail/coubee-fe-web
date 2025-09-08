@@ -140,9 +140,9 @@ const QRScanModal = ({ isOpen, onClose }) => {
             />
           </ModalBody>
           <ModalFooter>
-            <Button variant="tertiary" onClick={onClose}>
+            {/* <Button variant="tertiary" onClick={onClose}>
               취소
-            </Button>
+            </Button> */}
             <Button
               variant="primary"
               onClick={handleSubmit}

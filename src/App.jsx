@@ -15,7 +15,7 @@ import InformationSection from "./pages/ViewStore/components/InformationSection.
 import ItemSection from "./pages/ViewStore/components/ItemSection.jsx";
 import OrderSection from "./pages/ViewStore/components/Order/OrderSection";
 
-import SseListener from "./components/SseClient2.jsx";
+import SseListener from "./components/SseClient.jsx";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
