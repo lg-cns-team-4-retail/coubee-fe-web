@@ -28,6 +28,7 @@ const Table = styled.table`
     border: 1px solid #ddd;
     padding: 8px;
     text-align: left;
+    background: #fff;
   }
 
   th {

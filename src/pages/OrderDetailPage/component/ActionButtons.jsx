@@ -13,6 +13,25 @@ const ButtonContainer = styled.div`
   padding: 2rem 0;
 `;
 
+const getStatusName = (status) => {
+  switch (status) {
+    case "PAID":
+      return "결제됨";
+    case "CANCELLED_ADMIN":
+      return "점주 취소";
+    case "CANCELLED_USER":
+      return "사용자 취소";
+    case "PREPARING":
+      return "상품 준비중";
+    case "PREPARED":
+      return "픽업 대기중";
+    case "RECEIVED":
+      return "픽업 완료";
+    default:
+      return status;
+  }
+};
+
 const ActionButtons = ({ status, orderId }) => {
   const [updateStatus, { isLoading }] = useUpdateOrderStatusMutation();
 
@@ -21,7 +40,9 @@ const ActionButtons = ({ status, orderId }) => {
   const handleUpdate = async (newStatus) => {
     try {
       await updateStatus({ orderId, status: newStatus }).unwrap();
-      toast.success(`주문 상태가 '${newStatus}'(으)로 변경되었습니다.`);
+      toast.success(
+        `주문 상태가 '${getStatusName(newStatus)}'(으)로 변경되었습니다.`
+      );
     } catch (err) {
       toast.error(err.data?.message || "상태 변경에 실패했습니다.");
     }

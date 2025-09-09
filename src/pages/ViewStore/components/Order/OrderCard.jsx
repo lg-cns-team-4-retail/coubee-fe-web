@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Text from "../../../../components/common/Text";
 import Button from "../../../../components/common/Button";
 import { useNavigate } from "react-router-dom";
+import OrderStatusChip from "../../../../components/common/OrderStatusChip";
 
 const Card = styled.div`
   background-color: white;
@@ -97,7 +98,7 @@ const OrderCard = ({ order }) => {
             주문 번호 - {order.orderId}
           </Text>
         </div>
-        <StatusChip status={order.status}>{order.status}</StatusChip>
+        <OrderStatusChip status={order.status} />
       </CardHeader>
 
       <CustomerInfo>

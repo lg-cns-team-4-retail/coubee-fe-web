@@ -29,14 +29,20 @@ export const orderApi = createApi({
   tagTypes: ["Order"],
   endpoints: (builder) => ({
     getOrdersByStore: builder.query({
-      query: ({ storeId, page, size }) => ({
-        url: `/order/stores/${storeId}/orders`,
-        method: "GET",
-        params: { page, size },
-      }),
+      query: ({ storeId, page, size, keyword, status }) => {
+        const params = { page, size };
+        if (keyword) params.keyword = keyword;
+        if (status) params.status = status;
+        console.log(params);
+        return {
+          url: `/order/stores/${storeId}/orders`,
+          method: "GET",
+          params,
+        };
+      },
       serializeQueryArgs: ({ queryArgs }) => {
-        const { storeId } = queryArgs;
-        return { storeId };
+        const { storeId, keyword, status } = queryArgs;
+        return { storeId, keyword, status };
       },
       merge: (currentCache, newItems, { arg }) => {
         if (arg.page === 0) {
@@ -87,10 +93,9 @@ export const orderApi = createApi({
     cancelOrder: builder.mutation({
       query: ({ orderId, cancelReason }) => ({
         url: `/order/orders/${orderId}/cancel`,
-        method: "POST", // POST 또는 PATCH/PUT 등 서버 API에 맞는 메소드 사용
+        method: "POST",
         data: { cancelReason },
       }),
-      // 주문 취소 성공 시, 목록과 해당 상세 정보 캐시를 모두 무효화
       invalidatesTags: (result, error, { orderId }) => [
         { type: "Order", id: "LIST" },
         { type: "Order", id: orderId },

@@ -62,28 +62,7 @@ const OrderSection = () => {
   const [page, setPage] = useState(0);
   const [keyword, setKeyword] = useState("");
   const [debouncedKeyword, setDebouncedKeyword] = useState("");
-  const [status, setStatus] = useState(""); // 빈 문자열은 '전체'를 의미
-
-  const {
-    data: orderData,
-    isLoading,
-    isFetching,
-  } = useGetOrdersByStoreQuery({ storeId, page, size: 10 }, { skip: !storeId });
-
-  const orders =
-    orderData?.content.filter((item) => item.status !== "PENDING") || [];
-  const last = orderData?.last || false;
-  const observerRef = useRef(null);
-
-  const handleObserver = useCallback(
-    (entries) => {
-      const [target] = entries;
-      if (target.isIntersecting && !isFetching && !last) {
-        setPage((prevPage) => prevPage + 1);
-      }
-    },
-    [isFetching, last]
-  );
+  const [status, setStatus] = useState("");
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -99,6 +78,38 @@ const OrderSection = () => {
   useEffect(() => {
     setPage(0);
   }, [debouncedKeyword, status]);
+
+  const {
+    data: orderData,
+    isLoading,
+    isFetching,
+  } = useGetOrdersByStoreQuery(
+    {
+      storeId,
+      page,
+      size: 10,
+      keyword: debouncedKeyword, // 디바운싱된 키워드 전달
+      status, // 선택된 상태 전달
+    },
+    { skip: !storeId }
+  );
+
+  const orders =
+    orderData?.content.filter(
+      (item) => item.status !== "PENDING" && item.status !== "FAILED"
+    ) || [];
+  const last = orderData?.last || false;
+  const observerRef = useRef(null);
+
+  const handleObserver = useCallback(
+    (entries) => {
+      const [target] = entries;
+      if (target.isIntersecting && !isFetching && !last) {
+        setPage((prevPage) => prevPage + 1);
+      }
+    },
+    [isFetching, last]
+  );
 
   useEffect(() => {
     const observer = new IntersectionObserver(handleObserver, { threshold: 0 });
