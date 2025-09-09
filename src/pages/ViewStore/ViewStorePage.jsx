@@ -10,6 +10,8 @@ import StoreSkeleton from "./components/StoreSkeleton";
 import NotificationModal from "../../components/NotificationModal";
 
 import useKakaoLoader from "../../components/useKakaoLoader";
+import QrDoubleCheckModal from "./components/QRDoubleCheckModal";
+import { MdQrCodeScanner } from "react-icons/md";
 
 const Main = styled.div`
   max-width: 100%;
@@ -142,6 +144,30 @@ const TabContent = styled.div`
   padding: 0 1rem 1rem 1rem;
 `;
 
+const FloatingActionButton = styled.button`
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: ${({ theme }) => theme.primary};
+  color: white;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  z-index: 900;
+  transition: transform 0.2s ease-in-out;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+`;
+
 const TABS = [
   { path: "product", name: "상품" },
   { path: "info", name: "정보" },
@@ -157,6 +183,7 @@ const ViewStorePage = () => {
 
   const { loading, storeData, error } = useSelector((state) => state.viewStore);
   const [activeTab, setActiveTab] = useState("상품");
+  const [isQrModalOpen, setIsQrModalOpen] = useState(false);
 
   const closeErrorModal = () => {
     dispatch(resetViewStoreStatus());
@@ -199,6 +226,18 @@ const ViewStorePage = () => {
               </TabContent>
             </ContentWrapper>
           </StoreContainer>
+        </>
+      )}
+
+      {storeData && (
+        <>
+          <FloatingActionButton onClick={() => setIsQrModalOpen(true)}>
+            <MdQrCodeScanner />
+          </FloatingActionButton>
+          <QrDoubleCheckModal
+            isOpen={isQrModalOpen}
+            onClose={() => setIsQrModalOpen(false)}
+          />
         </>
       )}
 

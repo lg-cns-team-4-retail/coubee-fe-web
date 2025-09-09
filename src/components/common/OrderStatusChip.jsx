@@ -11,6 +11,8 @@ const ChipContainer = styled.span`
   color: white;
   text-align: center;
   background-color: ${({ backgroundColor }) => backgroundColor};
+  white-space: nowrap;
+  flex-shrink: 0;
 `;
 
 const OrderStatusChip = ({ status }) => {

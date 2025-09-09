@@ -87,40 +87,40 @@ const utils = {
 
 const typography = {
   h1: css`
-    font-size: ${({ theme }) => theme.font.size.h1}; /* 2.5rem */
+    font-size: ${({ theme }) => theme.font.size.h1}; /* 40px */
     @media (max-width: 768px) {
-      font-size: 2rem;
+      font-size: 2rem; /* 32px */
     }
   `,
   h2: css`
-    font-size: ${({ theme }) => theme.font.size.h2}; /* 2rem */
+    font-size: ${({ theme }) => theme.font.size.h2}; /* 32px */
     @media (max-width: 768px) {
-      font-size: 1.5rem;
+      font-size: 1.5rem; /* 24px */
     }
   `,
   h3: css`
-    font-size: ${({ theme }) => theme.font.size.h3}; /* 1.75rem */
+    font-size: ${({ theme }) => theme.font.size.h3}; /* 28px */
     @media (max-width: 768px) {
-      font-size: 1.25rem;
+      font-size: 1.25rem; /* 20px */
     }
   `,
   h4: css`
-    font-size: ${({ theme }) => theme.font.size.h4}; /* 1.5rem */
+    font-size: ${({ theme }) => theme.font.size.h4}; /* 24px */
     @media (max-width: 768px) {
-      font-size: 1rem;
-    }
-  `,
-  p: css`
-    font-size: ${({ theme }) => theme.font.size.caption}; /* 1rem */
-    @media (max-width: 768px) {
-      font-size: 0.7rem;
+      font-size: 1.125rem; /* 18px */
     }
   `,
   body: css`
-    font-size: ${({ theme }) => theme.font.size.body}; /* 1rem */
+    font-size: ${({ theme }) => theme.font.size.body}; /* 16px */
     @media (max-width: 768px) {
-      font-size: 1.5rem;
+      font-size: 0.9rem; /* 14.4px */
     }
+  `,
+  caption: css`
+    font-size: ${({ theme }) => theme.font.size.caption}; /* 14px */
+  `,
+  small: css`
+    font-size: ${({ theme }) => theme.font.size.small}; /* 12px */
   `,
 };
 
@@ -132,7 +132,7 @@ export const GlobalStyle = createGlobalStyle`
   @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
   @import url('https://cdn.jsdelivr.net/gh/sun-typeface/SUIT/fonts/variable/woff2/SUIT-Variable.css');
 
-  * {
+   * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -151,24 +151,12 @@ export const GlobalStyle = createGlobalStyle`
     transition: background-color 0.3s, color 0.3s;
   }
 
-
-  h1 { ${({ theme }) => theme.typography.h1}; }
-  h2 { ${({ theme }) => theme.typography.h2}; }
-  h3 { ${({ theme }) => theme.typography.h3}; }
-  h4 { ${({ theme }) => theme.typography.h4}; }
-  p { ${({ theme }) => theme.typography.p}; }
-
   h1, h2, h3, h4, h5, h6 {
     font-weight: ${({ theme }) => theme.font.weight.bold};
     color: ${({ theme }) => theme.text};
   }
   
   p {
-    margin-bottom: 1rem;
-  }
-
-  p {
-    font-size: ${({ theme }) => theme.font.size.body};
     margin-bottom: 1rem;
   }
 

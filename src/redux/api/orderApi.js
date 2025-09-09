@@ -109,4 +109,5 @@ export const {
   useGetOrderDetailsQuery,
   useUpdateOrderStatusMutation,
   useCancelOrderMutation,
+  useLazyGetOrderDetailsQuery,
 } = orderApi;

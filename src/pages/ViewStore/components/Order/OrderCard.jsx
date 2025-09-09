@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import Text from "../../../../components/common/Text";
-import Button from "../../../../components/common/Button";
 import { useNavigate } from "react-router-dom";
 import OrderStatusChip from "../../../../components/common/OrderStatusChip";
+import { useParams } from "react-router-dom";
 
 const Card = styled.div`
   background-color: white;
@@ -11,9 +11,7 @@ const Card = styled.div`
   border: 1px solid #eae4de;
   padding: 1.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-
   cursor: pointer;
 
   &:hover {
@@ -25,30 +23,20 @@ const Card = styled.div`
 const CardHeader = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 1rem;
   margin-bottom: 1rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid #f0f0f0;
 `;
 
-const StatusChip = styled.span`
-  padding: 0.4rem 0.8rem;
-  border-radius: 1rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: white;
-  background-color: ${({ status, theme }) => {
-    switch (status) {
-      case "PENDING":
-        return theme.accent;
-      case "CONFIRMED":
-        return theme.success;
-      case "CANCELLED_ADMIN":
-        return theme.error;
-      default:
-        return "#888";
-    }
-  }};
+const OrderInfo = styled.div`
+  flex: 1; /* 남는 공간을 모두 차지하도록 설정 */
+  min-width: 0; /* flex 아이템이 내용보다 작아질 수 있도록 허용 */
+`;
+
+const OrderIdText = styled(Text)`
+  word-break: break-all;
 `;
 
 const CustomerInfo = styled.div`
@@ -59,13 +47,23 @@ const ItemList = styled.div`
   border-top: 1px solid #f0f0f0;
   margin-top: 1rem;
   padding-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 `;
 
 const Item = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 0;
+  background-color: #f9f9f9;
+  padding: 0.75rem;
+  border-radius: 8px;
+`;
+
+const ItemInfoContainer = styled.div`
+  display: flex;
+  flex-direction: column;
 `;
 
 const DetailsToggle = styled.button`
@@ -79,11 +77,18 @@ const DetailsToggle = styled.button`
 
 const OrderCard = ({ order }) => {
   const [showDetails, setShowDetails] = useState(true);
-
+  const { id } = useParams();
   const navigate = useNavigate();
 
-  const handleCardClick = () => {
-    navigate(order.orderId);
+  const handleCardClick = (e) => {
+    if (
+      e.target.closest("button") === e.currentTarget.querySelector("button")
+    ) {
+      e.stopPropagation();
+      setShowDetails(!showDetails);
+      return;
+    }
+    navigate(`/view-store/${id}/orders/${order.orderId}`);
   };
 
   const formatDate = (dateString) =>
@@ -92,12 +97,13 @@ const OrderCard = ({ order }) => {
   return (
     <Card onClick={handleCardClick}>
       <CardHeader>
-        <div>
+        {/* ✅ 3. 기존 div와 Text를 새로운 스타일 컴포넌트로 교체 */}
+        <OrderInfo>
           <Text weight="bold">{formatDate(order.createdAt)}</Text>
-          <Text variant="small" weight="bold" color="text_secondary">
+          <OrderIdText variant="small" weight="bold" color="text_secondary">
             주문 번호 - {order.orderId}
-          </Text>
-        </div>
+          </OrderIdText>
+        </OrderInfo>
         <OrderStatusChip status={order.status} />
       </CardHeader>
 
@@ -108,7 +114,7 @@ const OrderCard = ({ order }) => {
         </Text>
       </CustomerInfo>
 
-      <DetailsToggle onClick={() => setShowDetails(!showDetails)}>
+      <DetailsToggle>
         {showDetails ? "주문 내역 숨기기" : "주문 내역 상세보기"}
       </DetailsToggle>
 
@@ -116,12 +122,19 @@ const OrderCard = ({ order }) => {
         <ItemList>
           {order.items.map((item) => (
             <Item key={item.productId}>
-              <Text>
-                {item.productName} ({item.quantity}개)
-              </Text>
-              <Text weight="semibold">
-                {(item.quantity * item.price).toLocaleString()}원
-              </Text>
+              <ItemInfoContainer>
+                <Text weight="semibold">{item.productName}</Text>
+                <Text variant="small" color="text_secondary">
+                  {item.quantity}개
+                </Text>
+              </ItemInfoContainer>
+              {item.totalPrice ? (
+                <Text weight="bold">{item.totalPrice.toLocaleString()}원</Text>
+              ) : (
+                <Text weight="bold">
+                  {(item.quantity * item.price).toLocaleString()}원
+                </Text>
+              )}
             </Item>
           ))}
         </ItemList>

@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import { MdQrCodeScanner } from "react-icons/md";
 import OrderCancelModal from "./OrderCancelModal";
 import QRScanModal from "./QRScanModal";
+import QrDoubleCheckModal from "../../ViewStore/components/QRDoubleCheckModal";
 
 const ButtonContainer = styled.div`
   display: flex;
@@ -103,7 +104,10 @@ const ActionButtons = ({ status, orderId }) => {
         onClose={() => setCancelModalOpen(false)}
         orderId={orderId}
       />
-      <QRScanModal isOpen={qrModalOpen} onClose={() => setQrModalOpen(false)} />
+      <QrDoubleCheckModal
+        isOpen={qrModalOpen}
+        onClose={() => setQrModalOpen(false)}
+      />
     </ButtonContainer>
   );
 };
