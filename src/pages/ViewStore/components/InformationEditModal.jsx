@@ -4,6 +4,7 @@ import { FaTimes } from "react-icons/fa";
 import { useSelector, useDispatch } from "react-redux";
 import ImageUploader from "../../../components/ImageUploader";
 import { updateStoreDetail } from "../../../redux/slices/viewStoreSlice";
+import { toast } from "react-toastify";
 const IMG_BASE_URL = import.meta.env.VITE_IMG_URL;
 
 const LockScroll = createGlobalStyle`
@@ -252,9 +253,11 @@ const InformationEditModal = ({ isOpen, onClose }) => {
   const handleUpdateStoreDetail = async () => {
     try {
       const response = await dispatch(updateStoreDetail(data)).unwrap();
-      /* onClose(); */
+      onClose();
+      toast.success("정보가 성공적으로 수정됐습니다");
     } catch (err) {
       console.error("error");
+      toast.success("정보 수정에 실패했습니다");
     }
   };
 

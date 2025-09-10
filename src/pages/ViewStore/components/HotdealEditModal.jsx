@@ -83,7 +83,7 @@ const HotdealEditModal = ({ isOpen, onClose }) => {
   const [deactivateHotdeal, { isLoading: isDeactivating }] =
     useDeactivateHotdealMutation();
 
-  const isHotdealActive = hotdeal && hotdeal.hotdealStatus === "ACTIVE";
+  const isHotdealActive = hotdeal && hotdeal.maxDiscount > 0;
 
   useEffect(() => {
     if (isHotdealActive) {
