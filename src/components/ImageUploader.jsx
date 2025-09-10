@@ -192,7 +192,6 @@ const ImageUploader = ({ aspectRatio, onUploadComplete, type }) => {
       if (croppedImageFile.size < 100) {
         throw new Error("잘라낸 이미지 파일이 너무 작거나 손상되었습니다.");
       }
-      console.log(croppedImageFile);
       if (type === "background") {
         const finalImgUrl = await uploadBackgroundImage(croppedImageFile);
         onUploadComplete(finalImgUrl);
@@ -261,7 +260,6 @@ const ImageUploader = ({ aspectRatio, onUploadComplete, type }) => {
   };
 
   const renderContent = () => {
-    console.log(imageSrc, "check");
     if (isUploading) {
       return <LoadingSpinner>업로드 중...</LoadingSpinner>;
     }

@@ -60,7 +60,6 @@ const viewStoreSlice = createSlice({
     },
     updateHotdealStatus: (state, action) => {
       if (state.storeData) {
-        console.log(action, "action check");
         state.storeData.hotdeal = action.payload;
       }
     },
@@ -72,7 +71,6 @@ const viewStoreSlice = createSlice({
         state.error = null;
       })
       .addCase(viewStoreDetail.fulfilled, (state, action) => {
-        console.log(action.payload, "slice check");
         state.loading = "succeeded";
         state.storeData = action.payload.data;
         state.message = action.payload.message;

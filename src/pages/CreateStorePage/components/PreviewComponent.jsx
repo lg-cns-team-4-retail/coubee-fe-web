@@ -207,7 +207,6 @@ const Tag = styled.span`
   font-weight: 500;
 `;
 const PreviewComponent = ({ data }) => {
-  console.log(data);
   const [activeTab, setActiveTab] = useState("store");
 
   const renderContent = () => {

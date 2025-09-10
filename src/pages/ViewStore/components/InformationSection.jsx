@@ -181,7 +181,8 @@ const InformationSection = () => {
           <InfoTextContainer>
             <InfoTitle as="h3">가게 설명</InfoTitle>
             <InfoContent as="h5">{description}</InfoContent>
-            {storeTag.length > 0 && (
+
+            {storeTag && storeTag.length > 0 && (
               <TagContainer>
                 {storeTag.map((item) => (
                   <Tag key={item.categoryId}>#{item.name}</Tag>

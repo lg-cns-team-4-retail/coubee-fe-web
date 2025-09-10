@@ -90,8 +90,6 @@ const QRScanModal = ({ isOpen, onClose }) => {
       return;
     }
 
-    console.log(scannedResult);
-
     try {
       await updateStatus({
         orderId: scannedResult,

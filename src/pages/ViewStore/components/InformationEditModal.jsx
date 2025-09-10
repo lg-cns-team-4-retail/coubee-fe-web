@@ -251,9 +251,8 @@ const InformationEditModal = ({ isOpen, onClose }) => {
 
   const handleUpdateStoreDetail = async () => {
     try {
-      console.log(data);
       const response = await dispatch(updateStoreDetail(data)).unwrap();
-      onClose();
+      /* onClose(); */
     } catch (err) {
       console.error("error");
     }

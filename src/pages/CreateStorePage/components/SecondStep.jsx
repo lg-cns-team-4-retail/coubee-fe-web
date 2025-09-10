@@ -101,7 +101,6 @@ const ChangeImageButton = styled.button`
 `;
 
 const SecondStep = ({ data, onChange, onImageUpload, errors, resetImage }) => {
-  console.log(data);
   return (
     <StepContainer>
       <Section>

@@ -13,7 +13,6 @@ export const loginUser = createAsyncThunk(
       const response = await apiClient.post("/user/auth/login", loginData);
 
       const responseData = response.data.data;
-      console.log(responseData);
 
       if (typeof window !== "undefined" && responseData) {
         const { access, refresh } = responseData.accessRefreshToken;
@@ -76,7 +75,6 @@ const userSlice = createSlice({
         state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
-        console.log(action.payload);
         state.status = "succeeded";
         state.isLoggedIn = true;
         state.userInfo = action.payload;

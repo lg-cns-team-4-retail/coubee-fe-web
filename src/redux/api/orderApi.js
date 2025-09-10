@@ -33,7 +33,6 @@ export const orderApi = createApi({
         const params = { page, size };
         if (keyword) params.keyword = keyword;
         if (status) params.status = status;
-        console.log(params);
         return {
           url: `/order/stores/${storeId}/orders`,
           method: "GET",

@@ -504,13 +504,11 @@ const StoreCreationModal = ({ isOpen, onClose }) => {
   };
 
   const handleSubmit = () => {
-    console.log("제출할 데이터:", formData);
     onClose();
   };
 
   const handleImageUpload = (file) => {
     setFormData((prev) => ({ ...prev, backgroundImage: file }));
-    console.log(file);
   };
   const handleProfileImageUpload = (file) => {
     setFormData((prev) => ({ ...prev, profileImage: file }));

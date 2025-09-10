@@ -159,7 +159,6 @@ function Header() {
   );
 
   const handleLogout = () => {
-    console.log("check");
     dispatch(logoutUser());
     setIsMobileMenuOpen(false);
     setTimeout(() => {

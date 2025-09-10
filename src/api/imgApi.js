@@ -2,7 +2,6 @@ import apiClient from "./index";
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export const uploadProfileImage = async (file) => {
-  console.log(file);
   const formData = new FormData();
 
   formData.append("file", file);
@@ -17,9 +16,7 @@ export const uploadProfileImage = async (file) => {
       }
     );
 
-    console.log("Image upload success:", response.data);
     const finalUrl = API_BASE_URL + "/store" + response.data.data;
-    console.log(finalUrl);
     return response.data.data;
   } catch (error) {
     console.error("Image upload failed:", error);
@@ -28,8 +25,6 @@ export const uploadProfileImage = async (file) => {
 };
 
 export const uploadBackgroundImage = async (file) => {
-  console.log(file);
-
   const formData = new FormData();
 
   formData.append("file", file);
@@ -44,9 +39,7 @@ export const uploadBackgroundImage = async (file) => {
       }
     );
 
-    console.log("Image upload success:", response.data);
     const finalUrl = API_BASE_URL + "/store" + response.data.data;
-    console.log(finalUrl);
     return response.data.data;
   } catch (error) {
     console.error("Image upload failed:", error);
@@ -55,8 +48,6 @@ export const uploadBackgroundImage = async (file) => {
 };
 
 export const uploadCertificateImage = async (file) => {
-  console.log(file);
-
   const formData = new FormData();
 
   formData.append("file", file);
@@ -71,9 +62,7 @@ export const uploadCertificateImage = async (file) => {
       }
     );
 
-    console.log("Image upload success:", response.data);
     const finalUrl = API_BASE_URL + "/store" + response.data.data;
-    console.log(finalUrl);
     return response.data.data;
   } catch (error) {
     console.error("Image upload failed:", error);
@@ -82,8 +71,6 @@ export const uploadCertificateImage = async (file) => {
 };
 
 export const uploadProductImage = async (file) => {
-  console.log(file);
-
   const formData = new FormData();
 
   formData.append("file", file);
@@ -98,9 +85,7 @@ export const uploadProductImage = async (file) => {
       }
     );
 
-    console.log("Image upload success:", response.data);
     const finalUrl = API_BASE_URL + "/store" + response.data.data;
-    console.log(finalUrl);
     return response.data.data;
   } catch (error) {
     console.error("Image upload failed:", error);

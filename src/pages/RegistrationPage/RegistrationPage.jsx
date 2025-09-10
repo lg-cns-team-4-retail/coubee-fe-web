@@ -175,7 +175,6 @@ export default function RegistrationPage() {
     try {
       const result = await dispatch(registerUser(formData)).unwrap();
 
-      console.log("회원가입 성공:", result);
       setModalState({
         isOpen: true,
         title: "회원가입 성공",

@@ -106,7 +106,6 @@ const ThirdStep = ({ data, onChange, onAddressSelect, errors }) => {
     }
 
     const coordinates = await getCoordinates(fullAddress);
-    console.log(coordinates);
     onAddressSelect({
       storeAddress: fullAddress,
       ...coordinates,

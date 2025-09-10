@@ -116,7 +116,6 @@ const FirstStep = ({
   errors,
   resetImage,
 }) => {
-  console.log(data);
   return (
     <StepContainer>
       <Section>

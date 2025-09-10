@@ -8,7 +8,6 @@ export const registerStore = createAsyncThunk(
   async (storeData, { rejectWithValue }) => {
     try {
       const response = await apiClient.post("/store/admin/register", storeData);
-      console.log(response);
       if (response.data.code === "OK") {
         return response.data; // 성공 시 전체 응답 데이터를 반환
       } else {
