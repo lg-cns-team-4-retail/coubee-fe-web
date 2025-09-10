@@ -11,9 +11,12 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  BarChart,
+  Bar,
 } from "recharts";
 import styled from "styled-components";
 import ChartSkeleton from "./ChartSkeleton";
+import Text from "../../../../components/common/Text";
 
 const MonthPicker = styled.input`
   padding: 0.5rem 0.75rem;
@@ -69,30 +72,60 @@ const MonthlySalesChart = () => {
     { skip: !storeId }
   );
   if (isLoading) return <ChartSkeleton />;
-  if (error) return <div>Error fetching data</div>;
-  if (!data) return <div>No data available</div>;
+  if (error) return <div>일시적인 오류에요</div>;
+  if (!data) return <div>가능한 데이터가 없어요</div>;
 
   const { overallSummary, weeklyBreakdown } = data;
 
   return (
     <div>
-      <h2>
+      <Text
+        as="h2"
+        variant="h3"
+        weight="bold"
+        style={{ marginBottom: "0.5rem" }}
+      >
         {year}년 {month}월 매출
-      </h2>
+      </Text>
       <MonthPicker
         type="month"
         value={format(date, "yyyy-MM")}
         onChange={(e) => setDate(new Date(e.target.value))}
       />
-      <div>
-        <h3>요약</h3>
-        <p>총 매출: {overallSummary.totalSalesAmount.toLocaleString()}원</p>
-        <p>총 주문 수: {overallSummary.totalOrderCount}건</p>
+      <div style={{ marginBottom: "1rem" }}>
+        <Text
+          as="h2"
+          variant="h3"
+          weight="bold"
+          style={{ marginBottom: "0.5rem" }}
+        >
+          요약
+        </Text>
+        <Text as="p" variant="body" color="text_secondary">
+          총 매출:{" "}
+          <Text as="span" weight="bold" color="text">
+            {overallSummary.totalSalesAmount.toLocaleString()}원
+          </Text>
+        </Text>
+        <Text as="p" variant="body" color="text_secondary">
+          총 주문 수:{" "}
+          <Text as="span" weight="bold" color="text">
+            {overallSummary.totalOrderCount}건
+          </Text>
+        </Text>
       </div>
 
-      <h3>주별 매출</h3>
+      <Text
+        as="h2"
+        variant="h3"
+        weight="bold"
+        style={{ marginBottom: "0.5rem" }}
+      >
+        주별 매출
+      </Text>
       <ResponsiveContainer width="100%" height={300}>
-        <AreaChart data={weeklyBreakdown}>
+        {/* AreaChart -> BarChart */}
+        <BarChart data={weeklyBreakdown}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis
             dataKey="weekNumber"
@@ -101,14 +134,9 @@ const MonthlySalesChart = () => {
           <YAxis />
           <Tooltip content={<CustomTooltip />} />
           <Legend />
-          <Area
-            type="monotone"
-            dataKey="salesAmount"
-            name="매출"
-            stroke="#8884d8"
-            fill="#8884d8"
-          />
-        </AreaChart>
+          {/* Area -> Bar, stroke와 fill을 fill 하나로 통일합니다. */}
+          <Bar dataKey="salesAmount" name="매출" fill="#8884d8" />
+        </BarChart>
       </ResponsiveContainer>
     </div>
   );

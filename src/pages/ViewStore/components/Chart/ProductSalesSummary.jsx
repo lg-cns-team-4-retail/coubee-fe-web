@@ -3,6 +3,17 @@ import { useSelector } from "react-redux";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { useGetProductSalesSummaryQuery } from "../../../../redux/api/salesApi";
 import styled, { keyframes } from "styled-components";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+import Text from "../../../../components/common/Text";
 
 const loadingAnimation = keyframes`
   0% { background-position: 200% 0; }
@@ -100,17 +111,75 @@ const ProductSalesSummary = () => {
       </div>
     );
 
-  if (error) return <div>Error fetching data</div>;
-  if (!data) return <div>No data available</div>;
+  if (error) return <div>일시적인 오류에요</div>;
+  if (!data) return <div>가능한 데이터가 없어요</div>;
 
   return (
     <div>
-      <h2>{format(date, "yyyy년 MM월")} 상품별 판매 요약</h2>
+      <Text
+        as="h2"
+        variant="h3"
+        weight="bold"
+        style={{ marginBottom: "0.5rem" }}
+      >
+        {format(date, "yyyy년 MM월")} 상품별 판매 요약
+      </Text>
       <MonthPicker
         type="month"
         value={format(date, "yyyy-MM")}
         onChange={(e) => setDate(new Date(e.target.value))}
       />
+
+      <ResponsiveContainer width="100%" height={500}>
+        <BarChart
+          data={data}
+          margin={{
+            top: 20,
+            right: 30,
+            left: 20,
+            bottom: 5,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="productName" />
+
+          <YAxis
+            yAxisId="left"
+            tickFormatter={(value) => value.toLocaleString()}
+            orientation="left"
+            stroke="#000"
+          />
+
+          <YAxis yAxisId="right" orientation="right" stroke="#000" />
+
+          <Tooltip
+            formatter={(value, name) => {
+              if (name === "총 매출") {
+                return `${value.toLocaleString()}원`;
+              }
+              if (name === "총 판매 수량") {
+                return `${value.toLocaleString()}개`;
+              }
+              return value;
+            }}
+          />
+          <Legend />
+
+          <Bar
+            yAxisId="left"
+            dataKey="totalSalesAmount"
+            name="총 매출"
+            fill="#82ca9d"
+          />
+
+          <Bar
+            yAxisId="right"
+            dataKey="totalQuantitySold"
+            name="총 판매 수량"
+            fill="#6495ED"
+          />
+        </BarChart>
+      </ResponsiveContainer>
 
       <Table>
         <thead>

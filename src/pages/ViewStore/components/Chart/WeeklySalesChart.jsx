@@ -14,7 +14,7 @@ import {
 } from "recharts";
 import styled from "styled-components";
 import ChartSkeleton from "./ChartSkeleton";
-
+import Text from "../../../../components/common/Text";
 const DatePicker = styled.input`
   padding: 0.5rem 0.75rem;
   border: 1px solid #ccc;
@@ -84,28 +84,51 @@ const WeeklySalesChart = () => {
   );
 
   if (isLoading) return <ChartSkeleton />;
-  if (error) return <div>Error fetching data</div>;
-  if (!data) return <div>No data available</div>;
+  if (error) return <div>일시적인 오류에요</div>;
+  if (!data) return <div>가능한 데이터가 없어요</div>;
 
   const { overallSummary, dailyBreakdown } = data;
 
   return (
     <div>
-      <h2>
+      <Text
+        as="h2"
+        variant="h3"
+        weight="bold"
+        style={{ marginBottom: "0.5rem" }}
+      >
         {data.weekStartDate} ~ {data.weekEndDate} 매출
-      </h2>
+      </Text>
       <DatePicker
         type="date"
         value={format(date, "yyyy-MM-dd")}
         onChange={(e) => setDate(new Date(e.target.value))}
       />
-      <div>
-        <h3>요약</h3>
-        <p>총 매출: {overallSummary.totalSalesAmount.toLocaleString()}원</p>
-        <p>총 주문 수: {overallSummary.totalOrderCount}건</p>
+      <div style={{ marginBottom: "1rem" }}>
+        <Text
+          as="h2"
+          variant="h3"
+          weight="bold"
+          style={{ marginBottom: "0.5rem" }}
+        >
+          요약
+        </Text>
+        <Text as="p" variant="body" color="text_secondary">
+          총 매출: {overallSummary.totalSalesAmount.toLocaleString()}원
+        </Text>
+        <Text as="p" variant="body" color="text_secondary">
+          총 주문 수: {overallSummary.totalOrderCount}건
+        </Text>
       </div>
 
-      <h3>요일별 매출</h3>
+      <Text
+        as="h2"
+        variant="h3"
+        weight="bold"
+        style={{ marginBottom: "0.5rem" }}
+      >
+        요일별 매출
+      </Text>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={dailyBreakdown}>
           <CartesianGrid strokeDasharray="3 3" />
