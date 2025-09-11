@@ -1,20 +1,17 @@
-// src/features/store/storeSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import apiClient from "../../api";
 
-// 1. 비동기 액션 생성 (createAsyncThunk) - Axios 사용
 export const registerStore = createAsyncThunk(
   "store/registerStore",
   async (storeData, { rejectWithValue }) => {
     try {
       const response = await apiClient.post("/store/admin/register", storeData);
       if (response.data.code === "OK") {
-        return response.data; // 성공 시 전체 응답 데이터를 반환
+        return response.data;
       } else {
         return rejectWithValue(response.data.message || "상점 등록 실패");
       }
     } catch (error) {
-      // Axios 에러 처리: error.response, error.request, error.message 등으로 구분 가능
       console.error("API Error Response:", error.response.data);
     }
   }
@@ -39,7 +36,6 @@ const storeSlice = createSlice({
       state.registeredStoreData = null;
     },
   },
-  // 3. 비동기 액션에 대한 리듀서 처리 (extraReducers)
   extraReducers: (builder) => {
     builder
       .addCase(registerStore.pending, (state) => {
@@ -52,8 +48,8 @@ const storeSlice = createSlice({
         state.loading = "succeeded";
         state.success = true;
         state.error = null;
-        state.message = action.payload.message; // API 응답의 message 필드
-        state.registeredStoreData = action.payload.data; // API 응답의 data 필드
+        state.message = action.payload.message;
+        state.registeredStoreData = action.payload.data;
       })
       .addCase(registerStore.rejected, (state, action) => {
         state.loading = "failed";

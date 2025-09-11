@@ -1,5 +1,3 @@
-// src/pages/OrderDetailPage/component/QrInputModal.jsx (신규 파일)
-
 import React, { useState, useEffect, useRef } from "react";
 import styled, { createGlobalStyle } from "styled-components";
 import { FaTimes } from "react-icons/fa";
@@ -77,7 +75,6 @@ const QRScanModal = ({ isOpen, onClose }) => {
   const [updateStatus, { isLoading }] = useUpdateOrderStatusMutation();
   const inputRef = useRef(null);
 
-  // 모달이 열릴 때마다 자동으로 input에 포커스를 줍니다.
   useEffect(() => {
     if (isOpen && inputRef.current) {
       setTimeout(() => inputRef.current.focus(), 100); // 약간의 딜레이 후 포커스
@@ -102,7 +99,6 @@ const QRScanModal = ({ isOpen, onClose }) => {
     }
   };
 
-  // Enter 키를 눌렀을 때도 제출이 가능하도록 합니다.
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
       handleSubmit();

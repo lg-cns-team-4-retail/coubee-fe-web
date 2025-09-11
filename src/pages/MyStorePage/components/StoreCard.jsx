@@ -3,7 +3,7 @@ import styled from "styled-components";
 import Text from "../../../components/common/Text";
 import { useNavigate } from "react-router-dom";
 import { FaStore } from "react-icons/fa";
-import NotificationModal from "../../../components/NotificationModal"; // 모달 컴포넌트 임포트 확인
+import NotificationModal from "../../../components/NotificationModal";
 const IMG_BASE_URL = import.meta.env.VITE_IMG_URL;
 
 const StoreCardContainer = styled.div`

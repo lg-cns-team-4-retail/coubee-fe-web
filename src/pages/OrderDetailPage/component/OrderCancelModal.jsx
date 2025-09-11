@@ -1,5 +1,3 @@
-// src/pages/OrderDetailPage/component/OrderCancelModal.jsx (신규 파일)
-
 import React, { useState } from "react";
 import styled, { createGlobalStyle } from "styled-components";
 import { FaTimes } from "react-icons/fa";
@@ -110,7 +108,7 @@ const OrderCancelModal = ({ isOpen, onClose, orderId }) => {
             <Button
               onClick={handleSubmit}
               disabled={isLoading}
-              style={{ backgroundColor: "#EF4444", borderColor: "#EF4444" }} // Error color
+              style={{ backgroundColor: "#EF4444", borderColor: "#EF4444" }}
             >
               {isLoading ? "취소 중..." : "주문 취소 확정"}
             </Button>

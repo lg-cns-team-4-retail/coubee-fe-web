@@ -129,26 +129,3 @@ const NotificationModal = ({
 };
 
 export default NotificationModal;
-
-/**
- * 
- * 
- *  사용처
- * 
-      <NotificationModal
-        isOpen={isSimpleModalOpen}
-        onClose={() => setSimpleModalOpen(false)}
-        title="보고 드리옵니다"
-        message="모든 성문이 굳건히 닫혔음을 확인하였나이다."
-      />
-
-
-      <NotificationModal
-        isOpen={isConfirmModalOpen}
-        onClose={() => setConfirmModalOpen(false)}
-        title="성공적으로 완수하였나이다"
-        message="전하의 어명이 모든 백성에게 전달되었습니다."
-        onSuccess={handleSuccessAction}
-        buttonText="다음 명을 내린다"
-      />
- */

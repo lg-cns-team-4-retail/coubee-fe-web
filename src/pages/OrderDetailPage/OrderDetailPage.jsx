@@ -146,7 +146,6 @@ const OrderTitle = styled(Text)`
   }
 `;
 
-// ... OrderQuote 함수는 동일 ...
 const OrderQuote = (status) => {
   switch (status) {
     case "PAID":
@@ -202,10 +201,7 @@ const OrderDetailPage = () => {
 
         <ProfileContainer>
           <ProfileImage
-            src={
-              order.customerInfo.profileImageUrl ||
-              `https://api.dicebear.com/7.x/official/svg?seed=${order.customerInfo.nickname}`
-            }
+            src={order.customerInfo.profileImageUrl}
             alt="profile"
           />
           <Text variant="h4" weight="bold">

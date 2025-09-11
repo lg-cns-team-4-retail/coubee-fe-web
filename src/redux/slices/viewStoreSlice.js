@@ -1,4 +1,3 @@
-// src/features/store/viewStoreSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import apiClient from "../../api";
 

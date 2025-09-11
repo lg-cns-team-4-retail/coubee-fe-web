@@ -67,14 +67,13 @@ const OrderSection = () => {
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedKeyword(keyword);
-    }, 500); // 500ms 지연
+    }, 500);
 
     return () => {
       clearTimeout(handler);
     };
   }, [keyword]);
 
-  // 3. 필터 변경 시 페이지를 0으로 초기화
   useEffect(() => {
     setPage(0);
   }, [debouncedKeyword, status]);

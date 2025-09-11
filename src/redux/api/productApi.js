@@ -1,8 +1,5 @@
-// src/redux/api/productApi.js (새로운 파일)
-
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import apiClient from "../../api";
-// apiClient와 동일한 baseUrl과 헤더 설정을 가져옵니다.
 
 const axiosBaseQuery =
   ({ baseUrl } = { baseUrl: "" }) =>
