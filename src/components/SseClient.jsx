@@ -13,7 +13,7 @@ export default function SseListener() {
   const isConnectingRef = useRef(false);
   const maxReconnectAttempts = 5;
   const { isLoggedIn } = useSelector((state) => state.user);
-
+  const { storeId } = useSelector((state) => state.viewStore);
   // Toast 컴포넌트
   const ToastComponent = ({ closeToast, title, message, url }) => {
     const handleClick = () => {

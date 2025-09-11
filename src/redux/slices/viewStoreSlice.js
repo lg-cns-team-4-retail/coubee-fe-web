@@ -50,6 +50,7 @@ const viewStoreSlice = createSlice({
     storeData: null,
     error: null,
     message: "",
+    storeId: null,
   },
   reducers: {
     resetViewStoreStatus: (state) => {
@@ -57,6 +58,7 @@ const viewStoreSlice = createSlice({
       state.storeData = null;
       state.error = null;
       state.message = "";
+      state.storeId = null;
     },
     updateHotdealStatus: (state, action) => {
       if (state.storeData) {
@@ -74,6 +76,7 @@ const viewStoreSlice = createSlice({
         state.loading = "succeeded";
         state.storeData = action.payload.data;
         state.message = action.payload.message;
+        state.storeId = action.payload.data.storeId;
       })
       .addCase(viewStoreDetail.rejected, (state, action) => {
         state.loading = "failed";
@@ -87,6 +90,7 @@ const viewStoreSlice = createSlice({
         state.updateLoading = "succeeded";
         state.storeData = action.payload.data;
         state.message = action.payload.message;
+        state.storeId = action.payload.data.storeId;
       })
       .addCase(updateStoreDetail.rejected, (state, action) => {
         state.updateLoading = "failed";
